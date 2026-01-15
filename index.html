@@ -728,7 +728,7 @@
                 <h1><i class="fas fa-calendar-alt"></i> 员工排班系统</h1>
                 <p>
                     <span>实时同步 • 云端存储</span>
-                    <span class="sync-status" id="syncStatus">
+                    <span class="sync-status connected" id="syncStatus">
                         <i class="fas fa-cloud"></i> 准备中...
                     </span>
                 </p>
@@ -841,10 +841,10 @@
                             Google Apps Script URL
                         </label>
                         <input type="text" id="apiUrl" class="form-input" 
-                               placeholder="https://script.google.com/macros/s/..." 
+                               value="https://script.google.com/macros/s/AKfycbwdpBARXO0fqwoAvKvDI-GH3xw_8ms5qkiiiFFETASHz0CgOo2gz0vcm0h8p7NtYf5L/exec" 
                                style="width: 100%;">
                         <p style="font-size: 0.85rem; color: var(--gray); margin-top: 8px;">
-                            从 Google Apps Script 部署获取的 Web App URL
+                            ✅ API URL 已预配置
                         </p>
                     </div>
                     
@@ -950,11 +950,12 @@
     <script>
         // ===========================================
         // 员工排班系统 - 实时同步版
+        // API URL: https://script.google.com/macros/s/AKfycbwdpBARXO0fqwoAvKvDI-GH3xw_8ms5qkiiiFFETASHz0CgOo2gz0vcm0h8p7NtYf5L/exec
         // ===========================================
 
-        // ⚙️ 配置
+        // ⚙️ CONFIG - ĐÃ CẤU HÌNH SẴN API URL CỦA BẠN
         const CONFIG = {
-            API_URL: 'https://script.google.com/macros/s/AKfycbzTkGW4CE2IW_l3PSJ5fPocvusgsLRYf5X2ih0d5Wh1N0PHeY9H8sg1AllwC2i6PgUL/exec',
+            API_URL: 'https://script.google.com/macros/s/AKfycbwdpBARXO0fqwoAvKvDI-GH3xw_8ms5qkiiiFFETASHz0CgOo2gz0vcm0h8p7NtYf5L/exec',
             SYNC_INTERVAL: 30000,
             AUTO_SYNC: true,
             LAST_SYNC: 0
@@ -976,14 +977,14 @@
             initApp();
             setupEventListeners();
             
-            if (CONFIG.API_URL) {
-                await testConnection();
-                if (CONFIG.AUTO_SYNC) {
+            // 自动测试连接
+            setTimeout(async () => {
+                const connected = await testConnection();
+                if (connected && CONFIG.AUTO_SYNC) {
                     startAutoSync();
+                    await syncFromCloud();
                 }
-            } else {
-                showConfigModal();
-            }
+            }, 1000);
         });
 
         // ==================== 配置管理 ====================
@@ -991,7 +992,12 @@
             try {
                 const saved = localStorage.getItem('emp_schedule_config');
                 if (saved) {
-                    Object.assign(CONFIG, JSON.parse(saved));
+                    const savedConfig = JSON.parse(saved);
+                    // Giữ lại URL đã config sẵn nếu savedConfig không có URL
+                    if (!savedConfig.API_URL) {
+                        savedConfig.API_URL = CONFIG.API_URL;
+                    }
+                    Object.assign(CONFIG, savedConfig);
                 }
             } catch (e) {
                 console.error('加载配置失败:', e);
@@ -1003,7 +1009,7 @@
         }
 
         function showConfigModal() {
-            document.getElementById('apiUrl').value = CONFIG.API_URL || '';
+            document.getElementById('apiUrl').value = CONFIG.API_URL;
             document.getElementById('syncInterval').value = CONFIG.SYNC_INTERVAL;
             document.getElementById('autoSync').checked = CONFIG.AUTO_SYNC;
             document.getElementById('configModal').classList.add('active');
@@ -1020,30 +1026,48 @@
             try {
                 const options = {
                     method: data ? 'POST' : 'GET',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    mode: 'cors',
+                    cache: 'no-cache'
                 };
                 
                 if (data) {
                     options.body = JSON.stringify(data);
                 }
                 
+                console.log('调用API:', method, url);
                 const response = await fetch(url, options);
-                return await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误! 状态: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('API响应:', result);
+                return result;
+                
             } catch (error) {
+                console.error('API调用失败:', error);
                 throw new Error(`网络错误: ${error.message}`);
             }
         }
 
         // ==================== 数据同步 ====================
         async function syncFromCloud() {
-            if (!CONFIG.API_URL) return;
+            if (!CONFIG.API_URL) {
+                updateSyncStatus('error', '未配置API URL');
+                return;
+            }
             
             updateSyncStatus('syncing', '同步中...');
             
             try {
                 // 获取员工数据
                 const empResponse = await callAPI('getEmployees');
-                if (empResponse.success) {
+                if (empResponse && empResponse.success) {
                     employees = empResponse.data;
                     
                     if (employees.length > 0 && !selectedEmployeeId) {
@@ -1051,14 +1075,18 @@
                     }
                     
                     renderEmployeeSelector();
+                } else {
+                    throw new Error('获取员工数据失败');
                 }
                 
                 // 获取排班数据
                 const weekKey = getWeekKey();
                 const scheduleResponse = await callAPI('getSchedules', { weekKey });
-                if (scheduleResponse.success) {
+                if (scheduleResponse && scheduleResponse.success) {
                     schedules = scheduleResponse.data;
                     renderSchedule();
+                } else {
+                    throw new Error('获取排班数据失败');
                 }
                 
                 updateSyncStatus('connected', `已同步 ${new Date().toLocaleTimeString('zh-CN')}`);
@@ -1070,24 +1098,41 @@
                 console.error('同步失败:', error);
                 updateSyncStatus('error', '同步失败');
                 showToast(`同步失败: ${error.message}`, 'error');
+                
+                // 尝试自动重连
+                setTimeout(() => {
+                    if (CONFIG.AUTO_SYNC) {
+                        syncFromCloud();
+                    }
+                }, 5000);
             }
         }
 
         async function syncToCloud() {
-            if (!selectedEmployeeId || !CONFIG.API_URL) return;
+            if (!selectedEmployeeId || !CONFIG.API_URL) {
+                showToast('请先选择员工', 'error');
+                return;
+            }
             
             const weekKey = getWeekKey();
             const employeeSchedule = schedules[selectedEmployeeId] || {};
             
+            updateSyncStatus('syncing', '保存中...');
+            
             try {
-                await callAPI('saveSchedule', {
+                const result = await callAPI('saveSchedule', {
                     employeeId: selectedEmployeeId,
                     weekKey: weekKey,
                     schedule: employeeSchedule
                 });
                 
-                updateSyncStatus('connected', `已保存 ${new Date().toLocaleTimeString('zh-CN')}`);
-                showToast('排班已保存到云端', 'success');
+                if (result && result.success) {
+                    updateSyncStatus('connected', `已保存 ${new Date().toLocaleTimeString('zh-CN')}`);
+                    showToast('排班已保存到云端', 'success');
+                    CONFIG.LAST_SYNC = Date.now();
+                } else {
+                    throw new Error('保存失败');
+                }
                 
             } catch (error) {
                 console.error('保存失败:', error);
@@ -1122,21 +1167,27 @@
         }
 
         async function testConnection() {
-            if (!CONFIG.API_URL) return false;
+            if (!CONFIG.API_URL) {
+                showToast('请先配置API URL', 'error');
+                return false;
+            }
             
             try {
                 updateSyncStatus('syncing', '测试连接中...');
                 const result = await callAPI('test');
                 
-                if (result.success) {
-                    updateSyncStatus('connected', '连接正常');
+                if (result && result.success) {
+                    updateSyncStatus('connected', '连接正常 ✓');
+                    showToast('API连接测试成功!', 'success');
                     return true;
                 } else {
                     updateSyncStatus('error', '连接失败');
+                    showToast('API连接测试失败', 'error');
                     return false;
                 }
             } catch (error) {
                 updateSyncStatus('error', '连接失败');
+                showToast(`连接测试失败: ${error.message}`, 'error');
                 return false;
             }
         }
@@ -1204,7 +1255,7 @@
                 
                 const result = await callAPI('saveEmployee', newEmployee);
                 
-                if (result.success) {
+                if (result && result.success) {
                     employees.push(result.data);
                     selectedEmployeeId = result.data.id;
                     
@@ -1213,10 +1264,14 @@
                     updateScheduleTitle();
                     
                     nameInput.value = '';
+                    colorInput.value = '#3498db';
+                    
                     showToast(`员工 "${name}" 已添加`, 'success');
                     
                     // 自动同步数据
                     await syncFromCloud();
+                } else {
+                    throw new Error('添加员工失败');
                 }
             } catch (error) {
                 showToast(`添加失败: ${error.message}`, 'error');
@@ -1233,20 +1288,26 @@
             if (!confirm(`确定删除员工 "${employee.name}" 吗？`)) return;
             
             try {
-                await callAPI('deleteEmployee', { id });
+                const result = await callAPI('deleteEmployee', { id });
                 
-                employees = employees.filter(e => e.id !== id);
-                
-                if (selectedEmployeeId === id) {
-                    selectedEmployeeId = employees[0]?.id || null;
+                if (result && result.success) {
+                    employees = employees.filter(e => e.id !== id);
+                    
+                    if (selectedEmployeeId === id) {
+                        selectedEmployeeId = employees[0]?.id || null;
+                    }
+                    
+                    renderEmployeeSelector();
+                    renderSchedule();
+                    updateScheduleTitle();
+                    
+                    showToast(`员工 "${employee.name}" 已删除`, 'warning');
+                    
+                    // 同步到云端
+                    await syncFromCloud();
+                } else {
+                    throw new Error('删除失败');
                 }
-                
-                renderEmployeeSelector();
-                renderSchedule();
-                updateScheduleTitle();
-                
-                showToast(`员工 "${employee.name}" 已删除`, 'warning');
-                
             } catch (error) {
                 showToast(`删除失败: ${error.message}`, 'error');
             }
@@ -1713,6 +1774,7 @@
             renderEmployeeSelector();
             renderSchedule();
             updateScheduleTitle();
+            updateSyncStatus('connected', '准备就绪');
         }
 
         // ==================== 事件监听器 ====================
@@ -1739,7 +1801,9 @@
             });
             
             // 同步按钮
-            document.getElementById('syncNowBtn').addEventListener('click', syncFromCloud);
+            document.getElementById('syncNowBtn').addEventListener('click', async () => {
+                await syncFromCloud();
+            });
             
             // 保存排班
             document.getElementById('saveScheduleBtn').addEventListener('click', async () => {
