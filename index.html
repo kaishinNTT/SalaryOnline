@@ -2,91 +2,66 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>员工排班系统 - 实时同步版</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>员工排班系统</title>
     <style>
         :root {
             --primary: #2563eb;
-            --primary-dark: #1d4ed8;
             --secondary: #10b981;
-            --secondary-dark: #059669;
             --danger: #ef4444;
-            --danger-dark: #dc2626;
             --warning: #f59e0b;
-            --warning-dark: #d97706;
             --light: #f8fafc;
             --dark: #1e293b;
             --gray: #64748b;
-            --gray-light: #cbd5e1;
-            --border: #e2e8f0;
-            --card-bg: #ffffff;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
-            --shadow: 0 4px 6px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
-            -webkit-tap-highlight-color: transparent;
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
         }
         
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 12px;
-            color: var(--dark);
+            padding: 15px;
         }
         
-        .app-container {
+        .container {
             max-width: 800px;
             margin: 0 auto;
             background: white;
-            border-radius: 20px;
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: var(--shadow-lg);
-            animation: fadeIn 0.5s ease;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
         
-        /* 顶部栏 */
-        .top-bar {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, #1d4ed8 100%);
             color: white;
-            padding: 18px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: var(--shadow);
+            padding: 25px;
+            text-align: center;
         }
         
-        .app-title h1 {
-            font-size: 1.4rem;
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
             font-weight: 700;
-            margin-bottom: 4px;
         }
         
-        .app-title p {
-            font-size: 0.85rem;
+        .header p {
             opacity: 0.9;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-size: 0.95rem;
         }
         
         .sync-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.8rem;
-            padding: 4px 10px;
+            display: inline-block;
+            padding: 6px 15px;
             background: rgba(255,255,255,0.15);
-            border-radius: 12px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9rem;
             font-weight: 500;
         }
         
@@ -105,73 +80,22 @@
             color: #ef4444;
         }
         
-        /* 周选择器 */
-        .week-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255,255,255,0.15);
-            padding: 8px 15px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .week-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 1.1rem;
-        }
-        
-        .week-btn:hover {
-            background: rgba(255,255,255,0.3);
-            transform: scale(1.1);
-        }
-        
-        .week-display {
-            font-weight: 600;
-            font-size: 0.95rem;
-            min-width: 180px;
-            text-align: center;
-            padding: 0 10px;
-        }
-        
-        /* 主内容区 */
-        .main-content {
-            padding: 20px;
-        }
-        
-        /* 卡片样式 */
         .card {
-            background: var(--card-bg);
-            border-radius: 16px;
+            background: white;
+            border-radius: 12px;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-        }
-        
-        .card:hover {
-            box-shadow: var(--shadow-lg);
-            transform: translateY(-2px);
+            margin: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
         }
         
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 18px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid var(--light);
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
         }
         
         .card-header h3 {
@@ -180,72 +104,48 @@
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
         
-        /* 按钮样式 */
         .btn {
-            padding: 10px 18px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: 600;
             font-size: 0.95rem;
             transition: all 0.3s;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
             gap: 8px;
-            min-height: 44px;
-            min-width: 44px;
         }
         
-        .btn i {
-            font-size: 1.1rem;
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, #1d4ed8 100%);
             color: white;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
         }
         
         .btn-success {
-            background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
+            background: linear-gradient(135deg, var(--secondary) 0%, #059669 100%);
             color: white;
-        }
-        
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
         }
         
         .btn-warning {
-            background: linear-gradient(135deg, var(--warning) 0%, var(--warning-dark) 100%);
+            background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
             color: white;
-        }
-        
-        .btn-warning:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
         }
         
         .btn-danger {
-            background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
             color: white;
         }
         
-        .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
-        }
-        
-        /* 员工选择器 */
-        .employee-selector {
+        .employee-pills {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
@@ -253,18 +153,13 @@
         }
         
         .employee-pill {
-            background: var(--light);
-            padding: 10px 20px;
+            background: #f1f5f9;
+            padding: 12px 20px;
             border-radius: 25px;
-            font-size: 0.95rem;
-            color: var(--dark);
-            border: 2px solid transparent;
             cursor: pointer;
             transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            user-select: none;
+            font-weight: 500;
+            border: 2px solid transparent;
             position: relative;
             overflow: hidden;
         }
@@ -285,91 +180,53 @@
             color: white;
             border-color: var(--primary);
             transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
         }
         
         .employee-pill.active::before {
             opacity: 0.6;
         }
         
-        .employee-pill .badge {
-            background: rgba(255,255,255,0.2);
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
+        .input-group {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-        
-        /* 员工管理 */
-        .employee-management {
-            display: grid;
-            grid-template-columns: 1fr auto;
             gap: 12px;
             margin-top: 20px;
         }
         
-        .input-group {
-            display: flex;
-            gap: 12px;
-        }
-        
-        .form-input {
+        .input-group input {
             flex: 1;
             padding: 12px 18px;
-            border: 2px solid var(--border);
-            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
             font-size: 1rem;
             transition: all 0.3s;
-            background: var(--light);
         }
         
-        .form-input:focus {
+        .input-group input:focus {
             border-color: var(--primary);
             outline: none;
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-            background: white;
         }
         
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        /* 排班表格 */
         .schedule-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 15px;
-            margin-top: 15px;
-        }
-        
-        @media (max-width: 768px) {
-            .schedule-grid {
-                grid-template-columns: 1fr;
-            }
+            margin-top: 20px;
         }
         
         .day-card {
-            background: var(--card-bg);
-            border-radius: 14px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
             padding: 18px;
-            border: 2px solid var(--border);
             transition: all 0.3s;
         }
         
         .day-card:hover {
             border-color: var(--primary);
             transform: translateY(-3px);
-        }
-        
-        .day-card.rest-day {
-            background: linear-gradient(135deg, #fff9e6 0%, #fffbeb 100%);
-            border-color: #fbbf24;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
         
         .day-header {
@@ -378,7 +235,7 @@
             align-items: center;
             margin-bottom: 15px;
             padding-bottom: 10px;
-            border-bottom: 2px solid var(--light);
+            border-bottom: 2px solid #f1f5f9;
         }
         
         .day-name {
@@ -390,12 +247,12 @@
         .day-date {
             font-size: 0.9rem;
             color: var(--gray);
-            background: var(--light);
+            background: #f8fafc;
             padding: 4px 10px;
             border-radius: 10px;
         }
         
-        .time-input-group {
+        .time-inputs {
             display: grid;
             grid-template-columns: 1fr auto 1fr;
             gap: 10px;
@@ -405,24 +262,16 @@
         
         .time-input {
             width: 100%;
-            padding: 10px 12px;
-            border: 2px solid var(--border);
-            border-radius: 10px;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
             font-size: 1rem;
             text-align: center;
-            background: white;
         }
         
         .time-input:focus {
             border-color: var(--primary);
             outline: none;
-        }
-        
-        .time-divider {
-            text-align: center;
-            color: var(--gray);
-            font-weight: bold;
-            font-size: 1.2rem;
         }
         
         .day-controls {
@@ -431,261 +280,46 @@
             gap: 10px;
         }
         
-        .form-select {
-            width: 100%;
-            padding: 10px 12px;
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            font-size: 0.95rem;
-            background: white;
-            color: var(--dark);
+        select.time-input {
             cursor: pointer;
         }
         
-        .form-select:focus {
-            border-color: var(--primary);
-            outline: none;
-        }
-        
-        .form-select.rest {
-            background: #fffbeb;
-            border-color: #fbbf24;
-            color: #d97706;
-        }
-        
-        .form-select.front {
-            background: #eff6ff;
-            border-color: #3b82f6;
-            color: #1d4ed8;
-        }
-        
-        .form-select.kitchen {
-            background: #fef2f2;
-            border-color: #ef4444;
-            color: #dc2626;
-        }
-        
-        /* 摘要栏 */
-        .summary-card {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            border-radius: 16px;
-            padding: 25px;
-            margin: 25px 0;
-            box-shadow: var(--shadow-lg);
-        }
-        
-        .summary-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        
-        .total-hours {
-            font-size: 2.5rem;
-            font-weight: 800;
-            line-height: 1;
-        }
-        
-        .total-hours span {
-            font-size: 1rem;
-            font-weight: 500;
-            opacity: 0.9;
-        }
-        
-        /* 模态框 */
-        .modal-overlay {
+        .toast {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 20px;
-            backdrop-filter: blur(5px);
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .modal-overlay.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: slideUp 0.4s ease;
-            box-shadow: var(--shadow-lg);
-        }
-        
-        .modal-header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: var(--primary);
             color: white;
-            padding: 20px 25px;
-            border-radius: 20px 20px 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-header h3 {
-            font-size: 1.3rem;
-            font-weight: 700;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
             display: flex;
             align-items: center;
             gap: 10px;
+            font-weight: 500;
         }
         
-        .modal-close {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 1.2rem;
+        .toast.success {
+            background: var(--secondary);
         }
         
-        .modal-close:hover {
-            background: rgba(255,255,255,0.3);
-            transform: rotate(90deg);
+        .toast.error {
+            background: var(--danger);
         }
         
-        .modal-body {
-            padding: 25px;
+        .toast.warning {
+            background: var(--warning);
         }
         
-        .modal-footer {
-            padding: 20px 25px;
-            border-top: 2px solid var(--light);
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
         
-        /* 打印预览 */
-        .print-preview {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            font-family: 'SimSun', 'Microsoft YaHei', sans-serif;
-            box-shadow: var(--shadow-sm);
-        }
-        
-        .print-header {
-            text-align: center;
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid var(--primary);
-        }
-        
-        .print-header h2 {
-            color: var(--dark);
-            margin-bottom: 8px;
-            font-size: 1.8rem;
-        }
-        
-        .print-header p {
-            color: var(--gray);
-            font-size: 1.1rem;
-        }
-        
-        .print-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            font-size: 0.95rem;
-        }
-        
-        .print-table th {
-            background: var(--primary);
-            color: white;
-            padding: 12px;
-            text-align: center;
-            font-weight: 600;
-            border: 1px solid var(--primary-dark);
-        }
-        
-        .print-table td {
-            padding: 10px 12px;
-            border: 1px solid var(--border);
-            text-align: center;
-        }
-        
-        .print-table tr:nth-child(even) {
-            background: #f8fafc;
-        }
-        
-        .print-total {
-            text-align: right;
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 2px solid var(--border);
-            font-weight: 700;
-            color: var(--dark);
-            font-size: 1.2rem;
-        }
-        
-        /* 动画 */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideUp {
-            from { 
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to { 
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        .pulse {
-            animation: pulse 0.3s ease;
-        }
-        
-        /* 响应式调整 */
-        @media (max-width: 640px) {
-            .top-bar {
-                flex-direction: column;
-                gap: 15px;
-                padding: 15px;
-            }
-            
-            .week-control {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .week-display {
-                min-width: auto;
-                flex: 1;
-            }
-            
-            .employee-management {
+        @media (max-width: 768px) {
+            .schedule-grid {
                 grid-template-columns: 1fr;
             }
             
@@ -693,548 +327,194 @@
                 flex-direction: column;
             }
             
-            .btn-group {
-                flex-direction: column;
-            }
-            
-            .btn-group .btn {
-                width: 100%;
-            }
-            
-            .summary-content {
-                flex-direction: column;
-                text-align: center;
-            }
-            
             .day-controls {
                 grid-template-columns: 1fr;
             }
         }
-        
-        /* 工具类 */
-        .text-center { text-align: center; }
-        .mt-1 { margin-top: 10px; }
-        .mt-2 { margin-top: 20px; }
-        .mb-1 { margin-bottom: 10px; }
-        .mb-2 { margin-bottom: 20px; }
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- 顶部栏 -->
-        <div class="top-bar">
-            <div class="app-title">
-                <h1><i class="fas fa-calendar-alt"></i> 员工排班系统</h1>
-                <p>
-                    <span>实时同步 • 云端存储</span>
-                    <span class="sync-status connected" id="syncStatus">
-                        <i class="fas fa-cloud"></i> 准备中...
-                    </span>
-                </p>
-            </div>
-            <div class="week-control">
-                <button class="week-btn" id="prevWeekBtn">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <div class="week-display" id="weekDisplay">加载中...</div>
-                <button class="week-btn" id="nextWeekBtn">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
+    <div class="container">
+        <div class="header">
+            <h1>员工排班系统</h1>
+            <p>实时同步 • 云端存储</p>
+            <div class="sync-status" id="syncStatus">准备中...</div>
         </div>
 
-        <!-- 主内容区 -->
-        <div class="main-content">
-            <!-- 员工管理卡片 -->
-            <div class="card">
-                <div class="card-header">
-                    <h3><i class="fas fa-users"></i> 员工管理</h3>
-                    <div class="btn-group">
-                        <button class="btn btn-warning" id="syncNowBtn">
-                            <i class="fas fa-sync-alt"></i> 立即同步
-                        </button>
-                        <button class="btn btn-primary" id="configBtn">
-                            <i class="fas fa-cog"></i> 设置
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="employee-selector" id="employeeSelector">
-                    <!-- 员工标签动态生成 -->
-                </div>
-                
-                <div class="employee-management">
-                    <div class="input-group">
-                        <input type="text" id="newEmployeeInput" class="form-input" 
-                               placeholder="输入新员工姓名" maxlength="10">
-                        <input type="color" id="employeeColor" class="form-input" 
-                               style="width: 60px; padding: 0;" value="#3498db">
-                    </div>
-                    <button class="btn btn-success" id="addEmployeeBtn">
-                        <i class="fas fa-plus"></i> 添加员工
+        <div class="card">
+            <div class="card-header">
+                <h3>👥 员工管理</h3>
+                <div>
+                    <button class="btn btn-warning" onclick="syncData()">
+                        🔄 同步数据
+                    </button>
+                    <button class="btn btn-primary" onclick="testConnection()">
+                        📡 测试连接
                     </button>
                 </div>
             </div>
-
-            <!-- 排班卡片 -->
-            <div class="card" id="scheduleCard">
-                <div class="card-header">
-                    <h3><i class="fas fa-clock"></i> 排班表</h3>
-                    <div class="btn-group">
-                        <button class="btn btn-warning" id="quickSetBtn">
-                            <i class="fas fa-bolt"></i> 快速设置
-                        </button>
-                        <button class="btn btn-success" id="saveScheduleBtn">
-                            <i class="fas fa-save"></i> 保存排班
-                        </button>
-                    </div>
-                </div>
-                
-                <div id="noEmployeeMessage" class="text-center" style="padding: 40px; color: var(--gray);">
-                    <i class="fas fa-user-plus" style="font-size: 3rem; margin-bottom: 15px;"></i>
-                    <h3 style="margin-bottom: 10px;">请先选择员工</h3>
-                    <p>点击上方的员工标签开始设置排班</p>
-                </div>
-                
-                <div class="schedule-grid" id="scheduleGrid" style="display: none;">
-                    <!-- 排班内容动态生成 -->
-                </div>
+            
+            <div class="employee-pills" id="employeeList">
+                <!-- 员工列表动态生成 -->
             </div>
-
-            <!-- 摘要卡片 -->
-            <div class="summary-card">
-                <div class="summary-content">
-                    <div>
-                        <div class="total-hours" id="totalHours">0<span> 小时</span></div>
-                        <p style="opacity: 0.9; margin-top: 5px;">本周总计工作时间</p>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-primary" id="printSingleBtn">
-                            <i class="fas fa-print"></i> 打印个人
-                        </button>
-                        <button class="btn btn-warning" id="printAllBtn">
-                            <i class="fas fa-file-alt"></i> 打印全部
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 配置模态框 -->
-    <div class="modal-overlay" id="configModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-cog"></i> 系统设置</h3>
-                <button class="modal-close" id="closeConfigModal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div style="margin-bottom: 25px;">
-                    <h4 style="margin-bottom: 15px; color: var(--dark);">
-                        <i class="fas fa-cloud"></i> 云端同步设置
-                    </h4>
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark);">
-                            Google Apps Script URL
-                        </label>
-                        <input type="text" id="apiUrl" class="form-input" 
-                               value="https://script.google.com/macros/s/AKfycbwdpBARXO0fqwoAvKvDI-GH3xw_8ms5qkiiiFFETASHz0CgOo2gz0vcm0h8p7NtYf5L/exec" 
-                               style="width: 100%;">
-                        <p style="font-size: 0.85rem; color: var(--gray); margin-top: 8px;">
-                            ✅ API URL 已预配置
-                        </p>
-                    </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark);">
-                            自动同步间隔
-                        </label>
-                        <select id="syncInterval" class="form-select" style="width: 100%;">
-                            <option value="10000">10秒</option>
-                            <option value="30000" selected>30秒</option>
-                            <option value="60000">1分钟</option>
-                            <option value="300000">5分钟</option>
-                        </select>
-                    </div>
-                    
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-                        <input type="checkbox" id="autoSync" checked style="width: 20px; height: 20px;">
-                        <label for="autoSync" style="font-weight: 600; color: var(--dark); cursor: pointer;">
-                            启用自动同步
-                        </label>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" id="testApiBtn">
-                    <i class="fas fa-wifi"></i> 测试连接
-                </button>
-                <button class="btn btn-primary" id="saveConfigBtn">
-                    <i class="fas fa-save"></i> 保存设置
-                </button>
-                <button class="btn btn-danger" id="cancelConfigBtn">
-                    <i class="fas fa-times"></i> 取消
+            
+            <div class="input-group">
+                <input type="text" id="newEmployeeName" placeholder="输入新员工姓名" maxlength="10">
+                <button class="btn btn-success" onclick="addEmployee()">
+                    ➕ 添加员工
                 </button>
             </div>
         </div>
-    </div>
 
-    <!-- 打印预览模态框 -->
-    <div class="modal-overlay" id="printModal">
-        <div class="modal-content" style="max-width: 700px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-print"></i> 打印预览</h3>
-                <button class="modal-close" id="closePrintModal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="print-preview" id="printPreview">
-                    <!-- 打印内容动态生成 -->
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="window.print()">
-                    <i class="fas fa-print"></i> 立即打印
-                </button>
-                <button class="btn btn-danger" id="cancelPrintBtn">
-                    <i class="fas fa-times"></i> 关闭
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 快速设置模态框 -->
-    <div class="modal-overlay" id="quickSetModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-bolt"></i> 快速设置</h3>
-                <button class="modal-close" id="closeQuickSetModal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 10px; font-weight: 600; color: var(--dark);">
-                        <i class="fas fa-clock"></i> 工作时间模板
-                    </label>
-                    <input type="text" id="timeTemplate" class="form-input" 
-                           placeholder="例如: 18:00-24:00" 
-                           style="width: 100%;">
-                </div>
-                <div style="margin-bottom: 25px;">
-                    <label style="display: block; margin-bottom: 10px; font-weight: 600; color: var(--dark);">
-                        <i class="fas fa-map-marker-alt"></i> 工作区域
-                    </label>
-                    <select id="positionTemplate" class="form-select" style="width: 100%;">
-                        <option value="">选择区域</option>
-                        <option value="front">前台/服务区</option>
-                        <option value="kitchen">厨房区</option>
-                    </select>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-success" id="applyQuickSetBtn">
-                        <i class="fas fa-check"></i> 应用设置
+        <div class="card">
+            <div class="card-header">
+                <h3>⏰ 排班表</h3>
+                <div>
+                    <button class="btn btn-warning" onclick="quickSet()">
+                        ⚡ 快速设置
                     </button>
-                    <button class="btn btn-danger" id="cancelQuickSetBtn">
-                        <i class="fas fa-times"></i> 取消
+                    <button class="btn btn-primary" onclick="saveSchedule()">
+                        💾 保存排班
                     </button>
                 </div>
+            </div>
+            
+            <div id="noEmployeeMsg" style="text-align: center; padding: 40px; color: var(--gray);">
+                <div style="font-size: 3rem; margin-bottom: 15px;">👤</div>
+                <h3 style="margin-bottom: 10px;">请先选择员工</h3>
+                <p>点击上方的员工标签开始设置排班</p>
+            </div>
+            
+            <div class="schedule-grid" id="scheduleGrid" style="display: none;">
+                <!-- 排班表动态生成 -->
             </div>
         </div>
     </div>
 
     <script>
         // ===========================================
-        // 员工排班系统 - 实时同步版
-        // API URL: https://script.google.com/macros/s/AKfycbwdpBARXO0fqwoAvKvDI-GH3xw_8ms5qkiiiFFETASHz0CgOo2gz0vcm0h8p7NtYf5L/exec
+        // 员工排班系统 - Frontend
+        // API URL: https://script.google.com/macros/s/AKfycbzdbCDR__3t3f994K7vwYJJ9aBNKugDNtqJHD0VwI_HlSkUenYovqUuF4HgpLwXgV8l/exec
         // ===========================================
 
-        // ⚙️ CONFIG - ĐÃ CẤU HÌNH SẴN API URL CỦA BẠN
-        const CONFIG = {
-            API_URL: 'https://script.google.com/macros/s/AKfycbwdpBARXO0fqwoAvKvDI-GH3xw_8ms5qkiiiFFETASHz0CgOo2gz0vcm0h8p7NtYf5L/exec',
-            SYNC_INTERVAL: 30000,
-            AUTO_SYNC: true,
-            LAST_SYNC: 0
-        };
-
-        // 📊 数据存储
+        // API URL MỚI CỦA BẠN
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzdbCDR__3t3f994K7vwYJJ9aBNKugDNtqJHD0VwI_HlSkUenYovqUuF4HgpLwXgV8l/exec';
+        
+        // Dữ liệu
         let employees = [];
         let schedules = {};
-        let currentWeekOffset = 0;
         let selectedEmployeeId = null;
-        let syncTimer = null;
         
         const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
         const dayNames = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
 
-        // 🚀 初始化应用
+        // Khởi động
         document.addEventListener('DOMContentLoaded', async () => {
-            await loadConfig();
-            initApp();
-            setupEventListeners();
-            
-            // 自动测试连接
-            setTimeout(async () => {
-                const connected = await testConnection();
-                if (connected && CONFIG.AUTO_SYNC) {
-                    startAutoSync();
-                    await syncFromCloud();
-                }
-            }, 1000);
+            updateSyncStatus('准备中...');
+            await testConnection();
+            await syncData();
         });
 
-        // ==================== 配置管理 ====================
-        async function loadConfig() {
-            try {
-                const saved = localStorage.getItem('emp_schedule_config');
-                if (saved) {
-                    const savedConfig = JSON.parse(saved);
-                    // Giữ lại URL đã config sẵn nếu savedConfig không có URL
-                    if (!savedConfig.API_URL) {
-                        savedConfig.API_URL = CONFIG.API_URL;
-                    }
-                    Object.assign(CONFIG, savedConfig);
-                }
-            } catch (e) {
-                console.error('加载配置失败:', e);
-            }
-        }
-
-        function saveConfig() {
-            localStorage.setItem('emp_schedule_config', JSON.stringify(CONFIG));
-        }
-
-        function showConfigModal() {
-            document.getElementById('apiUrl').value = CONFIG.API_URL;
-            document.getElementById('syncInterval').value = CONFIG.SYNC_INTERVAL;
-            document.getElementById('autoSync').checked = CONFIG.AUTO_SYNC;
-            document.getElementById('configModal').classList.add('active');
-        }
-
-        // ==================== Google API 通信 ====================
+        // ==================== API FUNCTIONS ====================
         async function callAPI(method, data = null) {
-            if (!CONFIG.API_URL) {
-                throw new Error('请先配置API URL');
-            }
+            console.log(`📡 API Call: ${method}`, data || '');
             
-            const url = `${CONFIG.API_URL}?method=${method}`;
+            // LUÔN DÙNG CORS PROXY
+            const proxyUrl = 'https://corsproxy.io/?';
+            const url = `${API_URL}?method=${method}&_=${Date.now()}`;
+            const fullUrl = proxyUrl + encodeURIComponent(url);
             
             try {
                 const options = {
                     method: data ? 'POST' : 'GET',
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
-                    },
-                    mode: 'cors',
-                    cache: 'no-cache'
+                    }
                 };
                 
                 if (data) {
                     options.body = JSON.stringify(data);
                 }
                 
-                console.log('调用API:', method, url);
-                const response = await fetch(url, options);
+                const response = await fetch(fullUrl, options);
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP错误! 状态: ${response.status}`);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 
                 const result = await response.json();
-                console.log('API响应:', result);
+                console.log('✅ API Response:', result);
                 return result;
                 
             } catch (error) {
-                console.error('API调用失败:', error);
-                throw new Error(`网络错误: ${error.message}`);
+                console.error('❌ API Error:', error);
+                throw error;
             }
-        }
-
-        // ==================== 数据同步 ====================
-        async function syncFromCloud() {
-            if (!CONFIG.API_URL) {
-                updateSyncStatus('error', '未配置API URL');
-                return;
-            }
-            
-            updateSyncStatus('syncing', '同步中...');
-            
-            try {
-                // 获取员工数据
-                const empResponse = await callAPI('getEmployees');
-                if (empResponse && empResponse.success) {
-                    employees = empResponse.data;
-                    
-                    if (employees.length > 0 && !selectedEmployeeId) {
-                        selectedEmployeeId = employees[0].id;
-                    }
-                    
-                    renderEmployeeSelector();
-                } else {
-                    throw new Error('获取员工数据失败');
-                }
-                
-                // 获取排班数据
-                const weekKey = getWeekKey();
-                const scheduleResponse = await callAPI('getSchedules', { weekKey });
-                if (scheduleResponse && scheduleResponse.success) {
-                    schedules = scheduleResponse.data;
-                    renderSchedule();
-                } else {
-                    throw new Error('获取排班数据失败');
-                }
-                
-                updateSyncStatus('connected', `已同步 ${new Date().toLocaleTimeString('zh-CN')}`);
-                CONFIG.LAST_SYNC = Date.now();
-                
-                showToast('数据同步成功', 'success');
-                
-            } catch (error) {
-                console.error('同步失败:', error);
-                updateSyncStatus('error', '同步失败');
-                showToast(`同步失败: ${error.message}`, 'error');
-                
-                // 尝试自动重连
-                setTimeout(() => {
-                    if (CONFIG.AUTO_SYNC) {
-                        syncFromCloud();
-                    }
-                }, 5000);
-            }
-        }
-
-        async function syncToCloud() {
-            if (!selectedEmployeeId || !CONFIG.API_URL) {
-                showToast('请先选择员工', 'error');
-                return;
-            }
-            
-            const weekKey = getWeekKey();
-            const employeeSchedule = schedules[selectedEmployeeId] || {};
-            
-            updateSyncStatus('syncing', '保存中...');
-            
-            try {
-                const result = await callAPI('saveSchedule', {
-                    employeeId: selectedEmployeeId,
-                    weekKey: weekKey,
-                    schedule: employeeSchedule
-                });
-                
-                if (result && result.success) {
-                    updateSyncStatus('connected', `已保存 ${new Date().toLocaleTimeString('zh-CN')}`);
-                    showToast('排班已保存到云端', 'success');
-                    CONFIG.LAST_SYNC = Date.now();
-                } else {
-                    throw new Error('保存失败');
-                }
-                
-            } catch (error) {
-                console.error('保存失败:', error);
-                updateSyncStatus('error', '保存失败');
-                showToast(`保存失败: ${error.message}`, 'error');
-            }
-        }
-
-        // ==================== 自动同步管理 ====================
-        function startAutoSync() {
-            if (syncTimer) clearInterval(syncTimer);
-            
-            syncTimer = setInterval(async () => {
-                if (CONFIG.AUTO_SYNC && CONFIG.API_URL) {
-                    await syncFromCloud();
-                }
-            }, CONFIG.SYNC_INTERVAL);
-        }
-
-        function stopAutoSync() {
-            if (syncTimer) {
-                clearInterval(syncTimer);
-                syncTimer = null;
-            }
-        }
-
-        // ==================== 界面更新 ====================
-        function updateSyncStatus(status, message) {
-            const el = document.getElementById('syncStatus');
-            el.className = `sync-status ${status}`;
-            el.innerHTML = `<i class="fas fa-cloud"></i> ${message}`;
         }
 
         async function testConnection() {
-            if (!CONFIG.API_URL) {
-                showToast('请先配置API URL', 'error');
-                return false;
-            }
-            
             try {
-                updateSyncStatus('syncing', '测试连接中...');
+                updateSyncStatus('测试连接中...', 'syncing');
                 const result = await callAPI('test');
                 
-                if (result && result.success) {
-                    updateSyncStatus('connected', '连接正常 ✓');
+                if (result.success) {
+                    updateSyncStatus('连接正常 ✓', 'connected');
                     showToast('API连接测试成功!', 'success');
                     return true;
                 } else {
-                    updateSyncStatus('error', '连接失败');
+                    updateSyncStatus('连接失败', 'error');
                     showToast('API连接测试失败', 'error');
                     return false;
                 }
             } catch (error) {
-                updateSyncStatus('error', '连接失败');
-                showToast(`连接测试失败: ${error.message}`, 'error');
+                updateSyncStatus('连接失败', 'error');
+                showToast(`连接失败: ${error.message}`, 'error');
                 return false;
             }
         }
 
-        // ==================== 员工管理 ====================
-        function renderEmployeeSelector() {
-            const container = document.getElementById('employeeSelector');
-            container.innerHTML = '';
-            
-            if (employees.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; color: var(--gray); padding: 20px; width: 100%;">
-                        <i class="fas fa-user-slash" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                        <p>暂无员工，请添加新员工</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            employees.forEach(employee => {
-                const pill = document.createElement('div');
-                pill.className = `employee-pill ${employee.id === selectedEmployeeId ? 'active' : ''}`;
-                pill.style.color = employee.color;
+        // ==================== DATA FUNCTIONS ====================
+        async function syncData() {
+            try {
+                updateSyncStatus('同步中...', 'syncing');
                 
-                pill.innerHTML = `
-                    <span>${employee.name}</span>
-                    ${employee.id === selectedEmployeeId ? 
-                        '<div class="badge"><i class="fas fa-check"></i></div>' : 
-                        ''}
-                `;
+                // Khởi tạo hệ thống nếu cần
+                await callAPI('initialize');
                 
-                pill.addEventListener('click', () => {
-                    selectedEmployeeId = employee.id;
-                    renderEmployeeSelector();
+                // Lấy danh sách nhân viên
+                const empResult = await callAPI('getEmployees');
+                if (empResult.success) {
+                    employees = empResult.data;
+                    
+                    // Tự động chọn nhân viên đầu tiên nếu chưa chọn
+                    if (employees.length > 0 && !selectedEmployeeId) {
+                        selectedEmployeeId = employees[0].id;
+                    }
+                    
+                    renderEmployees();
+                }
+                
+                // Lấy lịch làm việc
+                const weekKey = getCurrentWeekKey();
+                const scheduleResult = await callAPI('getSchedules', { weekKey });
+                if (scheduleResult.success) {
+                    schedules = scheduleResult.data;
                     renderSchedule();
-                    updateScheduleTitle();
-                });
+                }
                 
-                container.appendChild(pill);
-            });
+                updateSyncStatus('已同步', 'connected');
+                showToast('数据同步成功', 'success');
+                
+            } catch (error) {
+                updateSyncStatus('同步失败', 'error');
+                showToast(`同步失败: ${error.message}`, 'error');
+            }
         }
 
         async function addEmployee() {
-            const nameInput = document.getElementById('newEmployeeInput');
-            const colorInput = document.getElementById('employeeColor');
-            const name = nameInput.value.trim();
-            const color = colorInput.value;
+            const input = document.getElementById('newEmployeeName');
+            const name = input.value.trim();
             
             if (!name) {
                 showToast('请输入员工姓名', 'error');
@@ -1247,154 +527,144 @@
             }
             
             try {
-                const newEmployee = {
+                const colors = ['#3498db', '#2ecc71', '#e74c3c', '#9b59b6', '#f39c12', '#1abc9c'];
+                const color = colors[employees.length % colors.length];
+                
+                const result = await callAPI('saveEmployee', {
                     name: name,
-                    color: color,
-                    createdAt: new Date().toISOString()
-                };
+                    color: color
+                });
                 
-                const result = await callAPI('saveEmployee', newEmployee);
-                
-                if (result && result.success) {
-                    employees.push(result.data);
-                    selectedEmployeeId = result.data.id;
-                    
-                    renderEmployeeSelector();
-                    renderSchedule();
-                    updateScheduleTitle();
-                    
-                    nameInput.value = '';
-                    colorInput.value = '#3498db';
-                    
+                if (result.success) {
+                    input.value = '';
                     showToast(`员工 "${name}" 已添加`, 'success');
-                    
-                    // 自动同步数据
-                    await syncFromCloud();
-                } else {
-                    throw new Error('添加员工失败');
+                    await syncData();
                 }
+                
             } catch (error) {
                 showToast(`添加失败: ${error.message}`, 'error');
             }
         }
 
-        async function deleteEmployee(id) {
-            if (employees.length <= 1) {
-                showToast('至少需要保留一名员工', 'error');
+        async function saveSchedule() {
+            if (!selectedEmployeeId) {
+                showToast('请先选择员工', 'error');
                 return;
             }
             
-            const employee = employees.find(e => e.id === id);
-            if (!confirm(`确定删除员工 "${employee.name}" 吗？`)) return;
-            
             try {
-                const result = await callAPI('deleteEmployee', { id });
+                const weekKey = getCurrentWeekKey();
+                const scheduleData = {
+                    employeeId: selectedEmployeeId,
+                    weekKey: weekKey,
+                    schedule: schedules[selectedEmployeeId] || {}
+                };
                 
-                if (result && result.success) {
-                    employees = employees.filter(e => e.id !== id);
-                    
-                    if (selectedEmployeeId === id) {
-                        selectedEmployeeId = employees[0]?.id || null;
-                    }
-                    
-                    renderEmployeeSelector();
-                    renderSchedule();
-                    updateScheduleTitle();
-                    
-                    showToast(`员工 "${employee.name}" 已删除`, 'warning');
-                    
-                    // 同步到云端
-                    await syncFromCloud();
+                updateSyncStatus('保存中...', 'syncing');
+                const result = await callAPI('saveSchedule', scheduleData);
+                
+                if (result.success) {
+                    updateSyncStatus('已保存', 'connected');
+                    showToast('排班已保存到云端', 'success');
                 } else {
-                    throw new Error('删除失败');
+                    updateSyncStatus('保存失败', 'error');
+                    showToast('保存失败', 'error');
                 }
+                
             } catch (error) {
-                showToast(`删除失败: ${error.message}`, 'error');
+                updateSyncStatus('保存失败', 'error');
+                showToast(`保存失败: ${error.message}`, 'error');
             }
         }
 
-        // ==================== 排班管理 ====================
-        function updateScheduleTitle() {
-            const employee = employees.find(e => e.id === selectedEmployeeId);
-            const title = employee ? `${employee.name} 的排班表` : '排班表';
-            document.querySelector('#scheduleCard .card-header h3').innerHTML = 
-                `<i class="fas fa-clock"></i> ${title}`;
-        }
-
-        function getCurrentWeekDates() {
-            const now = new Date();
-            const currentDay = now.getDay();
-            const monday = new Date(now);
-            const diff = currentDay === 0 ? -6 : 1 - currentDay;
-            monday.setDate(monday.getDate() + diff + (currentWeekOffset * 7));
+        // ==================== UI FUNCTIONS ====================
+        function renderEmployees() {
+            const container = document.getElementById('employeeList');
+            container.innerHTML = '';
             
-            return Array.from({ length: 7 }, (_, i) => {
-                const date = new Date(monday);
-                date.setDate(monday.getDate() + i);
-                return date;
+            if (employees.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: var(--gray); padding: 20px; width: 100%;">
+                        <div style="font-size: 2rem; margin-bottom: 10px;">👤</div>
+                        <p>暂无员工，请添加新员工</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            employees.forEach(employee => {
+                const pill = document.createElement('div');
+                pill.className = `employee-pill ${employee.id === selectedEmployeeId ? 'active' : ''}`;
+                pill.style.color = employee.color;
+                pill.innerHTML = `
+                    ${employee.name}
+                    ${employee.id === selectedEmployeeId ? '✓' : ''}
+                `;
+                
+                pill.onclick = () => {
+                    selectedEmployeeId = employee.id;
+                    renderEmployees();
+                    renderSchedule();
+                };
+                
+                container.appendChild(pill);
             });
-        }
-
-        function getWeekKey() {
-            const monday = getCurrentWeekDates()[0];
-            return `${monday.getFullYear()}-${monday.getMonth() + 1}-${monday.getDate()}`;
-        }
-
-        function formatDate(date) {
-            return `${date.getMonth() + 1}月${date.getDate()}日`;
         }
 
         function renderSchedule() {
             const grid = document.getElementById('scheduleGrid');
-            const noEmpMsg = document.getElementById('noEmployeeMessage');
+            const noMsg = document.getElementById('noEmployeeMsg');
             
             if (!selectedEmployeeId) {
                 grid.style.display = 'none';
-                noEmpMsg.style.display = 'block';
+                noMsg.style.display = 'block';
                 return;
             }
             
             grid.style.display = 'grid';
-            noEmpMsg.style.display = 'none';
+            noMsg.style.display = 'none';
             
-            const dates = getCurrentWeekDates();
-            const weekKey = getWeekKey();
+            const employee = employees.find(e => e.id === selectedEmployeeId);
+            
+            // Tính ngày trong tuần
+            const today = new Date();
+            const monday = new Date(today);
+            const day = today.getDay();
+            const diff = day === 0 ? -6 : 1 - day;
+            monday.setDate(monday.getDate() + diff);
+            
             const employeeSchedule = schedules[selectedEmployeeId] || {};
             
             grid.innerHTML = '';
             
-            dates.forEach((date, index) => {
-                const day = days[index];
-                const dayData = employeeSchedule[day] || {};
+            days.forEach((dayKey, index) => {
+                const date = new Date(monday);
+                date.setDate(monday.getDate() + index);
+                
+                const dayData = employeeSchedule[dayKey] || {};
                 
                 const card = document.createElement('div');
-                card.className = `day-card ${dayData.status === 'rest' ? 'rest-day' : ''}`;
-                
+                card.className = 'day-card';
                 card.innerHTML = `
                     <div class="day-header">
                         <div class="day-name">${dayNames[index]}</div>
-                        <div class="day-date">${formatDate(date)}</div>
+                        <div class="day-date">${date.getMonth() + 1}/${date.getDate()}</div>
                     </div>
-                    
-                    <div class="time-input-group">
+                    <div class="time-inputs">
                         <input type="time" class="time-input" 
                                value="${dayData.start || ''}"
-                               onchange="updateDayData('${day}', 'start', this.value)">
-                        <div class="time-divider">-</div>
+                               onchange="updateDayData('${dayKey}', 'start', this.value)">
+                        <span style="font-weight: bold; color: var(--gray);">-</span>
                         <input type="time" class="time-input"
                                value="${dayData.end || ''}"
-                               onchange="updateDayData('${day}', 'end', this.value)">
+                               onchange="updateDayData('${dayKey}', 'end', this.value)">
                     </div>
-                    
                     <div class="day-controls">
-                        <select class="form-select ${dayData.status === 'rest' ? 'rest' : ''}"
-                                onchange="updateDayData('${day}', 'status', this.value)">
+                        <select class="time-input" onchange="updateDayData('${dayKey}', 'status', this.value)">
                             <option value="">正常上班</option>
                             <option value="rest" ${dayData.status === 'rest' ? 'selected' : ''}>休息</option>
                         </select>
-                        
-                        <select class="form-select ${dayData.position || ''}"
-                                onchange="updateDayData('${day}', 'position', this.value)">
+                        <select class="time-input" onchange="updateDayData('${dayKey}', 'position', this.value)">
                             <option value="">选择区域</option>
                             <option value="front" ${dayData.position === 'front' ? 'selected' : ''}>前台/服务区</option>
                             <option value="kitchen" ${dayData.position === 'kitchen' ? 'selected' : ''}>厨房区</option>
@@ -1404,14 +674,10 @@
                 
                 grid.appendChild(card);
             });
-            
-            calculateTotalHours();
         }
 
         function updateDayData(day, field, value) {
             if (!selectedEmployeeId) return;
-            
-            const weekKey = getWeekKey();
             
             if (!schedules[selectedEmployeeId]) {
                 schedules[selectedEmployeeId] = {};
@@ -1423,459 +689,77 @@
             
             schedules[selectedEmployeeId][day][field] = value;
             
-            // 如果是休息，清除时间
+            // Nếu chọn "休息", xóa thời gian
             if (field === 'status' && value === 'rest') {
                 schedules[selectedEmployeeId][day].start = '';
                 schedules[selectedEmployeeId][day].end = '';
                 renderSchedule();
             }
-            
-            calculateTotalHours();
-            highlightSaveButton();
         }
 
-        function calculateTotalHours() {
-            if (!selectedEmployeeId) {
-                document.getElementById('totalHours').innerHTML = '0<span> 小时</span>';
-                return;
-            }
-            
-            const employeeSchedule = schedules[selectedEmployeeId] || {};
-            let totalMinutes = 0;
-            
-            Object.values(employeeSchedule).forEach(day => {
-                if (day.start && day.end && day.status !== 'rest') {
-                    const start = parseTime(day.start);
-                    const end = parseTime(day.end);
-                    
-                    let diff = (end.h * 60 + end.m) - (start.h * 60 + start.m);
-                    if (diff < 0) diff += 24 * 60;
-                    
-                    totalMinutes += diff;
-                }
-            });
-            
-            const hours = Math.floor(totalMinutes / 60);
-            const minutes = totalMinutes % 60;
-            
-            const totalEl = document.getElementById('totalHours');
-            if (minutes > 0) {
-                totalEl.innerHTML = `${hours}<span> 小时 ${minutes} 分钟</span>`;
-            } else {
-                totalEl.innerHTML = `${hours}<span> 小时</span>`;
-            }
-        }
-
-        function parseTime(timeStr) {
-            const [h, m] = timeStr.split(':').map(Number);
-            return { h: h || 0, m: m || 0 };
-        }
-
-        function highlightSaveButton() {
-            const btn = document.getElementById('saveScheduleBtn');
-            btn.classList.add('pulse');
-            btn.innerHTML = '<i class="fas fa-exclamation-circle"></i> 有未保存的更改';
-            
-            setTimeout(() => {
-                btn.classList.remove('pulse');
-                btn.innerHTML = '<i class="fas fa-save"></i> 保存排班';
-            }, 2000);
-        }
-
-        // ==================== 快速设置 ====================
-        function applyQuickSet() {
+        function quickSet() {
             if (!selectedEmployeeId) {
                 showToast('请先选择员工', 'error');
                 return;
             }
             
-            const timeTemplate = document.getElementById('timeTemplate').value.trim();
-            const position = document.getElementById('positionTemplate').value;
+            const time = prompt('请输入工作时间模板 (如: 18:00-24:00):');
+            if (!time) return;
             
-            if (!timeTemplate && !position) {
-                showToast('请输入设置内容', 'error');
+            const [start, end] = time.split('-').map(s => s.trim());
+            
+            if (!start || !end) {
+                showToast('格式错误，请使用 "开始时间-结束时间" 格式', 'error');
                 return;
             }
-            
-            const [start, end] = timeTemplate ? timeTemplate.split('-').map(s => s.trim()) : ['', ''];
             
             days.forEach(day => {
                 if (!schedules[selectedEmployeeId]) {
                     schedules[selectedEmployeeId] = {};
                 }
                 
-                if (!schedules[selectedEmployeeId][day]) {
-                    schedules[selectedEmployeeId][day] = {};
-                }
-                
-                if (start && end) {
-                    schedules[selectedEmployeeId][day].start = start;
-                    schedules[selectedEmployeeId][day].end = end;
-                    if (schedules[selectedEmployeeId][day].status === 'rest') {
-                        schedules[selectedEmployeeId][day].status = '';
-                    }
-                }
-                
-                if (position) {
-                    schedules[selectedEmployeeId][day].position = position;
-                }
+                schedules[selectedEmployeeId][day] = {
+                    start: start,
+                    end: end,
+                    status: '',
+                    position: ''
+                };
             });
             
             renderSchedule();
-            highlightSaveButton();
-            
-            document.getElementById('quickSetModal').classList.remove('active');
-            document.getElementById('timeTemplate').value = '';
-            document.getElementById('positionTemplate').value = '';
-            
             showToast('快速设置已应用', 'success');
         }
 
-        // ==================== 打印功能 ====================
-        function printSingleSchedule() {
-            if (!selectedEmployeeId) {
-                showToast('请先选择员工', 'error');
-                return;
-            }
-            
-            const employee = employees.find(e => e.id === selectedEmployeeId);
-            const dates = getCurrentWeekDates();
-            const employeeSchedule = schedules[selectedEmployeeId] || {};
-            
-            let totalMinutes = 0;
-            let tableHTML = `
-                <table class="print-table">
-                    <thead>
-                        <tr>
-                            <th>星期</th>
-                            <th>日期</th>
-                            <th>工作时间</th>
-                            <th>状态</th>
-                            <th>工作区域</th>
-                            <th>工时</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-            
-            dates.forEach((date, index) => {
-                const day = days[index];
-                const dayData = employeeSchedule[day] || {};
-                let workTime = '--';
-                let status = '正常';
-                let position = '--';
-                let hours = '--';
-                
-                if (dayData.status === 'rest') {
-                    status = '休息';
-                } else if (dayData.start && dayData.end) {
-                    workTime = `${dayData.start} - ${dayData.end}`;
-                    
-                    const start = parseTime(dayData.start);
-                    const end = parseTime(dayData.end);
-                    let diff = (end.h * 60 + end.m) - (start.h * 60 + start.m);
-                    if (diff < 0) diff += 24 * 60;
-                    totalMinutes += diff;
-                    
-                    const h = Math.floor(diff / 60);
-                    const m = diff % 60;
-                    hours = m > 0 ? `${h}小时${m}分` : `${h}小时`;
-                    
-                    if (dayData.position === 'front') {
-                        position = '前台/服务区';
-                    } else if (dayData.position === 'kitchen') {
-                        position = '厨房区';
-                    }
-                }
-                
-                tableHTML += `
-                    <tr>
-                        <td>${dayNames[index]}</td>
-                        <td>${formatDate(date)}</td>
-                        <td>${workTime}</td>
-                        <td>${status}</td>
-                        <td>${position}</td>
-                        <td>${hours}</td>
-                    </tr>
-                `;
-            });
-            
-            const totalHours = Math.floor(totalMinutes / 60);
-            const totalMins = totalMinutes % 60;
-            const totalText = totalMins > 0 ? `${totalHours}小时${totalMins}分` : `${totalHours}小时`;
-            
-            tableHTML += `
-                    </tbody>
-                </table>
-                <div class="print-total">
-                    本周总计工作时间: ${totalText}
-                </div>
-            `;
-            
-            const printHTML = `
-                <div class="print-header">
-                    <h2>${employee.name} 工作时间表</h2>
-                    <p>${document.getElementById('weekDisplay').textContent}</p>
-                </div>
-                ${tableHTML}
-                <div style="margin-top: 25px; color: var(--gray); font-size: 0.9rem; text-align: right;">
-                    生成时间: ${new Date().toLocaleString('zh-CN')}
-                </div>
-            `;
-            
-            showPrintPreview(printHTML);
+        // ==================== UTILITY FUNCTIONS ====================
+        function getCurrentWeekKey() {
+            const now = new Date();
+            const monday = new Date(now);
+            const day = now.getDay();
+            const diff = day === 0 ? -6 : 1 - day;
+            monday.setDate(monday.getDate() + diff);
+            return `${monday.getFullYear()}-${monday.getMonth() + 1}-${monday.getDate()}`;
         }
 
-        function printAllSchedules() {
-            if (employees.length === 0) {
-                showToast('没有员工数据', 'error');
-                return;
-            }
-            
-            const dates = getCurrentWeekDates();
-            const weekKey = getWeekKey();
-            
-            let allTablesHTML = '';
-            
-            employees.forEach(employee => {
-                const employeeSchedule = schedules[employee.id] || {};
-                let employeeTotal = 0;
-                
-                let tableHTML = `
-                    <div style="margin-top: 30px; padding-top: 30px; border-top: 2px solid var(--border);">
-                        <h3 style="color: var(--primary); margin-bottom: 15px; font-size: 1.3rem;">
-                            ${employee.name}
-                        </h3>
-                        <table class="print-table">
-                            <thead>
-                                <tr>
-                                    <th>星期</th>
-                                    <th>工作时间</th>
-                                    <th>状态</th>
-                                    <th>工作区域</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                `;
-                
-                dates.forEach((date, index) => {
-                    const day = days[index];
-                    const dayData = employeeSchedule[day] || {};
-                    let workTime = '--';
-                    let status = '正常';
-                    let position = '--';
-                    
-                    if (dayData.status === 'rest') {
-                        status = '休息';
-                    } else if (dayData.start && dayData.end) {
-                        workTime = `${dayData.start} - ${dayData.end}`;
-                        
-                        const start = parseTime(dayData.start);
-                        const end = parseTime(dayData.end);
-                        let diff = (end.h * 60 + end.m) - (start.h * 60 + start.m);
-                        if (diff < 0) diff += 24 * 60;
-                        employeeTotal += diff;
-                        
-                        if (dayData.position === 'front') {
-                            position = '前台/服务区';
-                        } else if (dayData.position === 'kitchen') {
-                            position = '厨房区';
-                        }
-                    }
-                    
-                    tableHTML += `
-                        <tr>
-                            <td>${dayNames[index]}</td>
-                            <td>${workTime}</td>
-                            <td>${status}</td>
-                            <td>${position}</td>
-                        </tr>
-                    `;
-                });
-                
-                const hours = Math.floor(employeeTotal / 60);
-                const mins = employeeTotal % 60;
-                const totalText = mins > 0 ? `${hours}小时${mins}分` : `${hours}小时`;
-                
-                tableHTML += `
-                            </tbody>
-                        </table>
-                        <div style="text-align: right; margin-top: 15px; font-weight: 600;">
-                            合计: ${totalText}
-                        </div>
-                    </div>
-                `;
-                
-                allTablesHTML += tableHTML;
-            });
-            
-            const printHTML = `
-                <div class="print-header">
-                    <h2>全体员工工作时间表</h2>
-                    <p>${document.getElementById('weekDisplay').textContent}</p>
-                </div>
-                ${allTablesHTML}
-                <div style="margin-top: 30px; color: var(--gray); font-size: 0.9rem; text-align: right;">
-                    生成时间: ${new Date().toLocaleString('zh-CN')}
-                </div>
-            `;
-            
-            showPrintPreview(printHTML);
+        function updateSyncStatus(message, type = '') {
+            const el = document.getElementById('syncStatus');
+            el.textContent = message;
+            el.className = `sync-status ${type}`;
         }
 
-        function showPrintPreview(content) {
-            document.getElementById('printPreview').innerHTML = content;
-            document.getElementById('printModal').classList.add('active');
-        }
-
-        // ==================== 工具函数 ====================
         function showToast(message, type = 'info') {
             const toast = document.createElement('div');
-            toast.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
-                color: white;
-                padding: 15px 25px;
-                border-radius: 12px;
-                box-shadow: var(--shadow-lg);
-                z-index: 2000;
-                animation: slideUp 0.3s ease;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                font-weight: 500;
-                max-width: 400px;
-            `;
-            
+            toast.className = `toast ${type}`;
             toast.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
                 ${message}
             `;
             
             document.body.appendChild(toast);
             
             setTimeout(() => {
-                toast.style.animation = 'slideUp 0.3s ease reverse';
+                toast.style.animation = 'slideIn 0.3s ease reverse';
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
-        }
-
-        function initWeekDisplay() {
-            const dates = getCurrentWeekDates();
-            const start = formatDate(dates[0]);
-            const end = formatDate(dates[6]);
-            document.getElementById('weekDisplay').textContent = `${start} - ${end}`;
-        }
-
-        function initApp() {
-            initWeekDisplay();
-            renderEmployeeSelector();
-            renderSchedule();
-            updateScheduleTitle();
-            updateSyncStatus('connected', '准备就绪');
-        }
-
-        // ==================== 事件监听器 ====================
-        function setupEventListeners() {
-            // 周切换
-            document.getElementById('prevWeekBtn').addEventListener('click', () => {
-                currentWeekOffset--;
-                initWeekDisplay();
-                renderSchedule();
-                syncFromCloud();
-            });
-            
-            document.getElementById('nextWeekBtn').addEventListener('click', () => {
-                currentWeekOffset++;
-                initWeekDisplay();
-                renderSchedule();
-                syncFromCloud();
-            });
-            
-            // 员工管理
-            document.getElementById('addEmployeeBtn').addEventListener('click', addEmployee);
-            document.getElementById('newEmployeeInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') addEmployee();
-            });
-            
-            // 同步按钮
-            document.getElementById('syncNowBtn').addEventListener('click', async () => {
-                await syncFromCloud();
-            });
-            
-            // 保存排班
-            document.getElementById('saveScheduleBtn').addEventListener('click', async () => {
-                await syncToCloud();
-            });
-            
-            // 打印按钮
-            document.getElementById('printSingleBtn').addEventListener('click', printSingleSchedule);
-            document.getElementById('printAllBtn').addEventListener('click', printAllSchedules);
-            
-            // 设置按钮
-            document.getElementById('configBtn').addEventListener('click', showConfigModal);
-            
-            // 快速设置
-            document.getElementById('quickSetBtn').addEventListener('click', () => {
-                document.getElementById('quickSetModal').classList.add('active');
-            });
-            
-            document.getElementById('applyQuickSetBtn').addEventListener('click', applyQuickSet);
-            
-            // 配置模态框
-            document.getElementById('saveConfigBtn').addEventListener('click', () => {
-                CONFIG.API_URL = document.getElementById('apiUrl').value.trim();
-                CONFIG.SYNC_INTERVAL = parseInt(document.getElementById('syncInterval').value);
-                CONFIG.AUTO_SYNC = document.getElementById('autoSync').checked;
-                
-                saveConfig();
-                
-                if (CONFIG.AUTO_SYNC && CONFIG.API_URL) {
-                    startAutoSync();
-                    syncFromCloud();
-                }
-                
-                document.getElementById('configModal').classList.remove('active');
-                showToast('配置已保存', 'success');
-            });
-            
-            document.getElementById('testApiBtn').addEventListener('click', async () => {
-                const url = document.getElementById('apiUrl').value.trim();
-                if (!url) {
-                    showToast('请输入API URL', 'error');
-                    return;
-                }
-                
-                const oldUrl = CONFIG.API_URL;
-                CONFIG.API_URL = url;
-                
-                const connected = await testConnection();
-                if (!connected) {
-                    CONFIG.API_URL = oldUrl;
-                }
-            });
-            
-            // 关闭模态框
-            document.querySelectorAll('.modal-close, .modal-overlay, [id$="Btn"]').forEach(btn => {
-                if (btn.id && btn.id.includes('cancel') || btn.id.includes('close')) {
-                    btn.addEventListener('click', () => {
-                        document.querySelectorAll('.modal-overlay.active').forEach(modal => {
-                            modal.classList.remove('active');
-                        });
-                    });
-                }
-            });
-            
-            // 点击外部关闭模态框
-            document.querySelectorAll('.modal-overlay').forEach(modal => {
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        modal.classList.remove('active');
-                    }
-                });
-            });
         }
     </script>
 </body>
