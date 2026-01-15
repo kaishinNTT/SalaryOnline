@@ -1,1282 +1,1174 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý giờ làm nhân viên</title>
+    <title>员工工作时间管理</title>
     <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --gray: #95a5a6;
+        }
+        
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
             font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
         }
         
         body {
-            background-color: #f5f5f5;
-            color: #333;
-            padding: 20px;
-            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
         }
         
-        .container {
-            max-width: 1200px;
+        .app-container {
+            max-width: 1000px;
             margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
         }
         
-        header {
-            text-align: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e74c3c;
-        }
-        
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-            font-size: 1.8rem;
-        }
-        
-        .subtitle {
-            color: #7f8c8d;
-            font-size: 1rem;
-        }
-        
-        .week-info {
-            background-color: #fff;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        /* 头部样式 */
+        .app-header {
+            background: var(--primary);
+            color: white;
+            padding: 15px 20px;
             display: flex;
-            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-        }
-        
-        .week-selector {
-            display: flex;
-            align-items: center;
+            flex-wrap: wrap;
             gap: 10px;
         }
         
-        .week-selector button {
-            padding: 8px 15px;
-            border: none;
-            background-color: #3498db;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
+        .logo h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
         }
         
-        .week-selector button:hover {
-            background-color: #2980b9;
+        .logo p {
+            font-size: 0.85rem;
+            opacity: 0.8;
         }
         
-        .week-range {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .main-controls {
-            background-color: #fff;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        }
-        
-        .employee-select-section {
+        /* 周选择器样式 */
+        .week-selector {
             display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
             align-items: center;
+            gap: 5px;
+        }
+        
+        .week-btn {
+            background: var(--secondary);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .week-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .week-display {
+            background: white;
+            color: var(--primary);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            min-width: 200px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* 主控制区域 */
+        .main-controls {
+            padding: 20px;
+            background: var(--light);
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        @media (min-width: 768px) {
+            .main-controls {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .control-group {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+        }
+        
+        .control-group h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--light);
+        }
+        
+        /* 员工选择和管理 */
+        .employee-selector {
+            display: flex;
+            gap: 10px;
             margin-bottom: 15px;
         }
         
-        .select-container {
-            flex-grow: 1;
-            min-width: 200px;
-        }
-        
-        select, input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+        .employee-select {
+            flex: 1;
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
             font-size: 1rem;
+            background: white;
         }
         
         .btn {
-            padding: 12px 20px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 0.9rem;
             transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.85rem;
         }
         
         .btn-primary {
-            background-color: #2ecc71;
+            background: var(--success);
             color: white;
         }
         
         .btn-primary:hover {
-            background-color: #27ae60;
+            background: #219a52;
+            transform: translateY(-2px);
         }
         
         .btn-secondary {
-            background-color: #e74c3c;
+            background: var(--secondary);
             color: white;
         }
         
         .btn-secondary:hover {
-            background-color: #c0392b;
+            background: #2980b9;
+            transform: translateY(-2px);
         }
         
-        .btn-info {
-            background-color: #3498db;
+        .btn-danger {
+            background: var(--danger);
             color: white;
         }
         
-        .btn-info:hover {
-            background-color: #2980b9;
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
         }
         
-        .employee-manager {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         
-        .employee-manager h3 {
-            margin-bottom: 15px;
-            color: #2c3e50;
+        .btn-group .btn {
+            flex: 1;
+            min-width: 120px;
         }
         
+        /* 员工列表 */
         .employee-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 8px;
+            margin-top: 10px;
         }
         
-        .employee-item {
-            background-color: #ecf0f1;
-            padding: 10px 15px;
-            border-radius: 5px;
+        .employee-tag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 15px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            font-size: 0.9rem;
         }
         
-        .employee-item .delete-btn {
-            background-color: #e74c3c;
-            color: white;
+        .employee-tag .remove {
+            background: rgba(255,255,255,0.2);
             border: none;
-            width: 25px;
-            height: 25px;
+            color: white;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 0.8rem;
         }
         
+        .employee-tag .remove:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        /* 时间表样式 */
         .schedule-container {
-            background-color: #fff;
-            border-radius: 10px;
             padding: 20px;
+        }
+        
+        .schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            overflow-x: auto;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         
-        .schedule-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 700px;
+        .employee-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
         }
         
-        .schedule-table th, .schedule-table td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: center;
+        .employee-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--primary);
         }
         
-        .schedule-table th {
-            background-color: #34495e;
-            color: white;
-            font-weight: bold;
+        .schedule-actions {
+            display: flex;
+            gap: 10px;
         }
         
-        .schedule-table tr:nth-child(even) {
-            background-color: #f9f9f9;
+        /* 时间表格 */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
         }
         
-        .schedule-table tr:hover {
-            background-color: #f1f1f1;
+        @media (min-width: 1200px) {
+            .schedule-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        .day-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .day-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .day-card.active {
+            border-color: var(--success);
+            background: linear-gradient(135deg, #f8fff9 0%, #e8f7eb 100%);
         }
         
         .day-header {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light);
         }
         
         .day-name {
-            font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
         }
         
         .day-date {
+            color: var(--gray);
             font-size: 0.9rem;
-            color: #7f8c8d;
+        }
+        
+        /* 时间输入样式 */
+        .time-input-group {
+            margin-bottom: 15px;
+        }
+        
+        .time-input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .time-input-row label {
+            min-width: 60px;
+            color: var(--dark);
+            font-weight: 500;
         }
         
         .time-input {
-            width: 80px;
-            padding: 8px;
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
             text-align: center;
         }
         
-        .position-select {
-            width: 120px;
-            padding: 8px;
+        .time-input:focus {
+            border-color: var(--secondary);
+            outline: none;
         }
         
-        .summary {
-            background-color: #fff;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
+        .divider {
+            color: var(--gray);
+            font-weight: bold;
+        }
+        
+        /* 状态选择 */
+        .status-select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            background: white;
+        }
+        
+        .status-select.rest {
+            background: #fff9e6;
+            border-color: #ffd166;
+            color: #e6b400;
+        }
+        
+        /* 位置选择 */
+        .position-select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+        }
+        
+        .position-select.front {
+            background: #e8f4ff;
+            border-color: #3498db;
+            color: #2980b9;
+        }
+        
+        .position-select.kitchen {
+            background: #fff0f5;
+            border-color: #e74c3c;
+            color: #c0392b;
+        }
+        
+        /* 摘要区域 */
+        .summary-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 20px;
+            margin: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .summary-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
             align-items: center;
         }
         
         .total-hours {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #e74c3c;
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1;
         }
         
-        .action-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
+        .total-hours span {
+            font-size: 1rem;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+        
+        .summary-text {
+            text-align: left;
+        }
+        
+        .summary-text h3 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .summary-text p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        /* 全视图模式 */
+        .all-schedule-view {
+            padding: 20px;
+            display: none;
+        }
+        
+        .all-schedule-view.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .all-schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
             margin-top: 20px;
         }
         
-        .toggle-all-btn {
-            margin-bottom: 20px;
-            width: 100%;
-        }
-        
-        .all-schedule {
-            background-color: #fff;
-            border-radius: 10px;
+        .employee-schedule-card {
+            background: white;
+            border-radius: 15px;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            display: none;
-            overflow-x: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
         }
         
-        .all-schedule.show {
-            display: block;
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light);
         }
         
-        footer {
-            text-align: center;
-            margin-top: 30px;
-            color: #7f8c8d;
-            font-size: 0.9rem;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
+        /* 动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 0.3s ease;
+        }
+        
+        /* 响应式调整 */
         @media (max-width: 768px) {
-            .week-info {
+            .app-header {
                 flex-direction: column;
-                gap: 15px;
+                text-align: center;
             }
             
-            .summary {
-                flex-direction: column;
-                gap: 15px;
+            .week-selector {
+                width: 100%;
+                justify-content: center;
             }
             
-            .action-buttons {
+            .btn-group {
                 flex-direction: column;
             }
             
-            .btn {
+            .btn-group .btn {
                 width: 100%;
             }
+            
+            .schedule-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .employee-info {
+                justify-content: center;
+                text-align: center;
+            }
+            
+            .summary-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .summary-text {
+                text-align: center;
+            }
         }
         
-        .status-rest {
-            background-color: #ffeaa7;
-            color: #d35400;
-            font-weight: bold;
-            padding: 5px;
-            border-radius: 3px;
-        }
-        
-        .status-empty {
-            color: #95a5a6;
-            font-style: italic;
-        }
-        
-        .position-badge {
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
-        
-        .position-front {
-            background-color: #a29bfe;
-            color: white;
-        }
-        
-        .position-kitchen {
-            background-color: #fd79a8;
-            color: white;
+        /* 打印样式 */
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .app-container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .btn, .week-btn, .employee-select, .time-input, select {
+                display: none !important;
+            }
+            
+            .schedule-grid {
+                grid-template-columns: repeat(7, 1fr) !important;
+            }
+            
+            .day-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>员工工作时间管理 (Quản lý giờ làm việc nhân viên)</h1>
-            <p class="subtitle">轻松管理员工每周工作时间表 (Dễ dàng quản lý lịch làm việc hàng tuần của nhân viên)</p>
-        </header>
-        
-        <div class="week-info">
-            <div class="week-range" id="weekRange">本周: 2023年10月16日 - 2023年10月22日</div>
+    <div class="app-container">
+        <!-- 头部 -->
+        <div class="app-header">
+            <div class="logo">
+                <h1>员工工作时间管理</h1>
+                <p>高效安排，轻松管理</p>
+            </div>
             <div class="week-selector">
-                <button id="prevWeek">上周</button>
-                <button id="currentWeek">本周</button>
-                <button id="nextWeek">下周</button>
+                <button class="week-btn" id="prevWeek">◀ 上周</button>
+                <div class="week-display" id="weekDisplay">本周</div>
+                <button class="week-btn" id="nextWeek">下周 ▶</button>
             </div>
         </div>
-        
+
+        <!-- 主控制区 -->
         <div class="main-controls">
-            <div class="employee-select-section">
-                <div class="select-container">
-                    <select id="employeeSelect">
-                        <option value="">-- 选择员工 --</option>
+            <div class="control-group">
+                <h3>员工管理</h3>
+                <div class="employee-selector">
+                    <select class="employee-select" id="employeeSelect">
+                        <option value="">选择员工</option>
                     </select>
+                    <button class="btn btn-primary" id="saveBtn">💾 保存</button>
                 </div>
-                <button id="viewAllBtn" class="btn btn-info">查看所有员工</button>
-                <button id="hideAllBtn" class="btn btn-secondary">隐藏所有员工</button>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" id="viewAllBtn">👁️ 查看所有</button>
+                    <button class="btn btn-secondary" id="printBtn">🖨️ 打印</button>
+                    <button class="btn btn-danger" id="resetBtn">🔄 重置</button>
+                </div>
             </div>
             
-            <div class="employee-manager">
-                <h3>员工管理 (Quản lý nhân viên)</h3>
+            <div class="control-group">
+                <h3>添加新员工</h3>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="newEmployeeName" class="time-input" placeholder="输入姓名">
+                    <button class="btn btn-primary" id="addEmployeeBtn">➕ 添加</button>
+                </div>
                 <div class="employee-list" id="employeeList">
-                    <!-- Danh sách nhân viên sẽ được hiển thị ở đây -->
-                </div>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <input type="text" id="newEmployeeName" placeholder="输入新员工姓名">
-                    <button id="addEmployeeBtn" class="btn btn-primary">添加新员工</button>
+                    <!-- 员工标签 -->
                 </div>
             </div>
         </div>
-        
-        <button id="toggleAllBtn" class="btn toggle-all-btn">显示所有员工时间表</button>
-        
-        <div class="all-schedule" id="allSchedule">
-            <h3>所有员工时间表</h3>
-            <div id="allScheduleContent">
-                <!-- Nội dung bảng lịch tất cả nhân viên sẽ được thêm ở đây -->
+
+        <!-- 时间表 -->
+        <div class="schedule-container" id="scheduleContainer">
+            <div class="schedule-header">
+                <div class="employee-info">
+                    <div class="employee-name" id="currentEmployee">选择员工</div>
+                    <div class="week-display" id="scheduleWeek">本周时间表</div>
+                </div>
+                <div class="schedule-actions">
+                    <button class="btn btn-secondary btn-small" id="copyLastWeekBtn">📋 复制上周</button>
+                    <button class="btn btn-primary btn-small" id="quickSetBtn">⚡ 快速设置</button>
+                </div>
+            </div>
+            
+            <div class="schedule-grid" id="scheduleGrid">
+                <!-- 每日卡片 -->
             </div>
         </div>
-        
-        <div class="schedule-container">
-            <h3 id="selectedEmployeeTitle">员工工作时间表</h3>
-            <table class="schedule-table" id="scheduleTable">
-                <thead>
-                    <tr>
-                        <th>星期/日期</th>
-                        <th>星期一 <div class="day-date" id="monDate">10/16</div></th>
-                        <th>星期二 <div class="day-date" id="tueDate">10/17</div></th>
-                        <th>星期三 <div class="day-date" id="wedDate">10/18</div></th>
-                        <th>星期四 <div class="day-date" id="thuDate">10/19</div></th>
-                        <th>星期五 <div class="day-date" id="friDate">10/20</div></th>
-                        <th>星期六 <div class="day-date" id="satDate">10/21</div></th>
-                        <th>星期日 <div class="day-date" id="sunDate">10/22</div></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>工作时间</td>
-                        <td><input type="time" class="time-input start-time" data-day="mon"> - <input type="time" class="time-input end-time" data-day="mon"></td>
-                        <td><input type="time" class="time-input start-time" data-day="tue"> - <input type="time" class="time-input end-time" data-day="tue"></td>
-                        <td><input type="time" class="time-input start-time" data-day="wed"> - <input type="time" class="time-input end-time" data-day="wed"></td>
-                        <td><input type="time" class="time-input start-time" data-day="thu"> - <input type="time" class="time-input end-time" data-day="thu"></td>
-                        <td><input type="time" class="time-input start-time" data-day="fri"> - <input type="time" class="time-input end-time" data-day="fri"></td>
-                        <td><input type="time" class="time-input start-time" data-day="sat"> - <input type="time" class="time-input end-time" data-day="sat"></td>
-                        <td><input type="time" class="time-input start-time" data-day="sun"> - <input type="time" class="time-input end-time" data-day="sun"></td>
-                    </tr>
-                    <tr>
-                        <td>状态</td>
-                        <td>
-                            <select class="status-select" data-day="mon">
-                                <option value="">--</option>
-                                <option value="rest">休息</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class="status-select" data-day="tue">
-                                <option value="">--</option>
-                                <option value="rest">休息</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class="status-select" data-day="wed">
-                                <option value="">--</option>
-                                <option value="rest">休息</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class="status-select" data-day="thu">
-                                <option value="">--</option>
-                                <option value="rest">休息</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class="status-select" data-day="fri">
-                                <option value="">--</option>
-                                <option value="rest">休息</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class="status-select" data-day="sat">
-                                <option value="">--</option>
-                                <option value="rest">休息</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class="status-select" data-day="sun">
-                                <option value="">--</option>
-                                <option value="rest">休息</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>工作区域</td>
-                        <td>
-                            <select class="position-select" data-day="mon">
-                                <option value="">--</option>
-                                <option value="front">前台/服务区 (Horu)</option>
-                                <option value="kitchen">厨房区 (Kitchen)</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class="position-select" data-day="tue">
-                                <option value="">--</option>
-                                <option value="front">前台/服务区 (Horu)</option>
-                                <option value="kitchen">厨房区 (Kitchen)</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class="position-select" data-day="wed">
-                                <option value="">--</option>
-                                <option value="front">前台/服务区 (Horu)</option>
-                                <option value="kitchen">厨房区 (Kitchen)</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class="position-select" data-day="thu">
-                                <option value="">--</option>
-                                <option value="front">前台/服务区 (Horu)</option>
-                                <option value="kitchen">厨房区 (Kitchen)</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class="position-select" data-day="fri">
-                                <option value="">--</option>
-                                <option value="front">前台/服务区 (Horu)</option>
-                                <option value="kitchen">厨房区 (Kitchen)</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class="position-select" data-day="sat">
-                                <option value="">--</option>
-                                <option value="front">前台/服务区 (Horu)</option>
-                                <option value="kitchen">厨房区 (Kitchen)</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class="position-select" data-day="sun">
-                                <option value="">--</option>
-                                <option value="front">前台/服务区 (Horu)</option>
-                                <option value="kitchen">厨房区 (Kitchen)</option>
-                            </select>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        
-        <div class="summary">
-            <div>
-                <h3>本周工作时间总计</h3>
-                <div class="total-hours" id="totalHours">0 小时</div>
-            </div>
-            <div class="action-buttons">
-                <button id="saveBtn" class="btn btn-primary">保存更改</button>
-                <button id="printBtn" class="btn btn-info">打印工作时间表</button>
-                <button id="resetBtn" class="btn btn-secondary">重置</button>
+
+        <!-- 摘要 -->
+        <div class="summary-container">
+            <div class="summary-content">
+                <div class="total-hours" id="totalHours">0<span>小时</span></div>
+                <div class="summary-text">
+                    <h3>本周总计</h3>
+                    <p>工作时间统计</p>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="saveAllBtn">💾 保存全部</button>
+                    <button class="btn btn-secondary" onclick="window.print()">🖨️ 打印本页</button>
+                </div>
             </div>
         </div>
-        
-        <footer>
-            <p>员工工作时间管理系统 &copy; 2023 - 使用HTML/CSS/JavaScript开发</p>
-            <p>提示: 所有数据都保存在浏览器本地存储中，不会发送到服务器。</p>
-        </footer>
+
+        <!-- 全视图 -->
+        <div class="all-schedule-view" id="allScheduleView">
+            <div class="schedule-header">
+                <h2>所有员工时间表</h2>
+                <button class="btn btn-danger" id="closeAllViewBtn">✕ 关闭</button>
+            </div>
+            <div class="all-schedule-grid" id="allScheduleGrid">
+                <!-- 员工卡片 -->
+            </div>
+        </div>
     </div>
 
     <script>
-        // Khởi tạo dữ liệu
+        // 数据存储
         let employees = [];
         let schedules = {};
-        let currentWeekOffset = 0; // 0: tuần hiện tại, -1: tuần trước, 1: tuần sau
+        let currentWeekOffset = 0;
         let selectedEmployeeId = null;
-        let isAllScheduleVisible = false;
-
-        // Các ngày trong tuần
         const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-        const dayNames = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
+        const dayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
 
-        // Khởi tạo ứng dụng
-        document.addEventListener('DOMContentLoaded', function() {
+        // 初始化
+        document.addEventListener('DOMContentLoaded', initApp);
+
+        function initApp() {
             loadData();
-            initEventListeners();
-            updateWeekDisplay();
-            updateEmployeeList();
-            updateEmployeeSelect();
-            updateScheduleDisplay();
-        });
+            initWeekDisplay();
+            renderEmployeeList();
+            renderEmployeeSelect();
+            renderScheduleGrid();
+            setupEventListeners();
+            calculateTotalHours();
+        }
 
-        // Tải dữ liệu từ localStorage
+        // 数据管理
         function loadData() {
-            // Tải danh sách nhân viên
-            const savedEmployees = localStorage.getItem('employeeSchedule_employees');
-            if (savedEmployees) {
-                employees = JSON.parse(savedEmployees);
-            } else {
-                // Dữ liệu mẫu nếu chưa có
-                employees = [
-                    { id: 1, name: '张三' },
-                    { id: 2, name: '李四' },
-                    { id: 3, name: '王五' },
-                    { id: 4, name: '赵六' }
-                ];
-            }
-
-            // Tải lịch làm việc
-            const savedSchedules = localStorage.getItem('employeeSchedule_schedules');
-            if (savedSchedules) {
-                schedules = JSON.parse(savedSchedules);
-            }
+            const savedEmployees = localStorage.getItem('employeeData');
+            const savedSchedules = localStorage.getItem('scheduleData');
+            
+            employees = savedEmployees ? JSON.parse(savedEmployees) : [
+                { id: 1, name: '张三', color: '#667eea' },
+                { id: 2, name: '李四', color: '#764ba2' },
+                { id: 3, name: '王五', color: '#f093fb' },
+                { id: 4, name: '赵六', color: '#f5576c' }
+            ];
+            
+            schedules = savedSchedules ? JSON.parse(savedSchedules) : {};
         }
 
-        // Lưu dữ liệu vào localStorage
         function saveData() {
-            localStorage.setItem('employeeSchedule_employees', JSON.stringify(employees));
-            localStorage.setItem('employeeSchedule_schedules', JSON.stringify(schedules));
+            localStorage.setItem('employeeData', JSON.stringify(employees));
+            localStorage.setItem('scheduleData', JSON.stringify(schedules));
         }
 
-        // Khởi tạo các sự kiện
-        function initEventListeners() {
-            // Chọn nhân viên
-            document.getElementById('employeeSelect').addEventListener('change', function(e) {
-                selectedEmployeeId = e.target.value ? parseInt(e.target.value) : null;
-                updateScheduleDisplay();
-            });
-
-            // Thêm nhân viên mới
-            document.getElementById('addEmployeeBtn').addEventListener('click', addNewEmployee);
-
-            // Nhấn Enter để thêm nhân viên
-            document.getElementById('newEmployeeName').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    addNewEmployee();
-                }
-            });
-
-            // Xem tất cả nhân viên
-            document.getElementById('viewAllBtn').addEventListener('click', viewAllSchedules);
-
-            // Ẩn tất cả nhân viên
-            document.getElementById('hideAllBtn').addEventListener('click', hideAllSchedules);
-
-            // Lưu thay đổi
-            document.getElementById('saveBtn').addEventListener('click', saveSchedule);
-
-            // In lịch làm việc
-            document.getElementById('printBtn').addEventListener('click', printSchedule);
-
-            // Reset lịch làm việc
-            document.getElementById('resetBtn').addEventListener('click', resetSchedule);
-
-            // Chuyển tuần
-            document.getElementById('prevWeek').addEventListener('click', function() {
-                currentWeekOffset--;
-                updateWeekDisplay();
-                updateScheduleDisplay();
-            });
-
-            document.getElementById('currentWeek').addEventListener('click', function() {
-                currentWeekOffset = 0;
-                updateWeekDisplay();
-                updateScheduleDisplay();
-            });
-
-            document.getElementById('nextWeek').addEventListener('click', function() {
-                currentWeekOffset++;
-                updateWeekDisplay();
-                updateScheduleDisplay();
-            });
-
-            // Hiển thị/ẩn lịch tất cả nhân viên
-            document.getElementById('toggleAllBtn').addEventListener('click', toggleAllSchedules);
-
-            // Thay đổi thời gian làm việc
-            document.querySelectorAll('.time-input').forEach(input => {
-                input.addEventListener('change', calculateTotalHours);
-            });
-
-            // Thay đổi trạng thái (nghỉ)
-            document.querySelectorAll('.status-select').forEach(select => {
-                select.addEventListener('change', function() {
-                    const day = this.getAttribute('data-day');
-                    if (this.value === 'rest') {
-                        // Nếu chọn "休息", đặt thời gian làm việc về trống
-                        document.querySelectorAll(`.start-time[data-day="${day}"]`).forEach(input => input.value = '');
-                        document.querySelectorAll(`.end-time[data-day="${day}"]`).forEach(input => input.value = '');
-                    }
-                    calculateTotalHours();
-                });
-            });
-        }
-
-        // Thêm nhân viên mới
-        function addNewEmployee() {
-            const nameInput = document.getElementById('newEmployeeName');
-            const name = nameInput.value.trim();
-            
-            if (!name) {
-                alert('请输入员工姓名');
-                return;
-            }
-            
-            // Kiểm tra tên đã tồn tại chưa
-            if (employees.some(emp => emp.name === name)) {
-                alert('员工姓名已存在');
-                return;
-            }
-            
-            // Tạo ID mới
-            const newId = employees.length > 0 ? Math.max(...employees.map(emp => emp.id)) + 1 : 1;
-            
-            // Thêm nhân viên mới
-            employees.push({ id: newId, name: name });
-            
-            // Lưu dữ liệu
-            saveData();
-            
-            // Cập nhật giao diện
-            updateEmployeeList();
-            updateEmployeeSelect();
-            
-            // Xóa nội dung input
-            nameInput.value = '';
-            
-            // Chọn nhân viên mới
-            document.getElementById('employeeSelect').value = newId;
-            selectedEmployeeId = newId;
-            updateScheduleDisplay();
-            
-            alert(`员工 "${name}" 已添加`);
-        }
-
-        // Xóa nhân viên
-        function deleteEmployee(id) {
-            if (!confirm('确定要删除此员工吗？')) return;
-            
-            // Xóa nhân viên khỏi danh sách
-            employees = employees.filter(emp => emp.id !== id);
-            
-            // Xóa lịch làm việc của nhân viên
-            if (schedules[id]) {
-                delete schedules[id];
-            }
-            
-            // Lưu dữ liệu
-            saveData();
-            
-            // Cập nhật giao diện
-            updateEmployeeList();
-            updateEmployeeSelect();
-            
-            // Nếu đang xem nhân viên bị xóa, reset về không chọn ai
-            if (selectedEmployeeId === id) {
-                selectedEmployeeId = null;
-                document.getElementById('employeeSelect').value = '';
-                updateScheduleDisplay();
-            }
-        }
-
-        // Cập nhật danh sách nhân viên
-        function updateEmployeeList() {
-            const employeeList = document.getElementById('employeeList');
-            employeeList.innerHTML = '';
-            
-            employees.forEach(employee => {
-                const employeeItem = document.createElement('div');
-                employeeItem.className = 'employee-item';
-                employeeItem.innerHTML = `
-                    <span>${employee.name}</span>
-                    <button class="delete-btn" data-id="${employee.id}">×</button>
-                `;
-                employeeList.appendChild(employeeItem);
-            });
-            
-            // Thêm sự kiện cho nút xóa
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = parseInt(this.getAttribute('data-id'));
-                    deleteEmployee(id);
-                });
-            });
-        }
-
-        // Cập nhật dropdown chọn nhân viên
-        function updateEmployeeSelect() {
-            const select = document.getElementById('employeeSelect');
-            const currentValue = select.value;
-            
-            // Giữ lại option đầu tiên
-            select.innerHTML = '<option value="">-- 选择员工 --</option>';
-            
-            // Thêm các nhân viên
-            employees.forEach(employee => {
-                const option = document.createElement('option');
-                option.value = employee.id;
-                option.textContent = employee.name;
-                select.appendChild(option);
-            });
-            
-            // Khôi phục giá trị đã chọn
-            if (currentValue) {
-                select.value = currentValue;
-                selectedEmployeeId = parseInt(currentValue);
-            }
-        }
-
-        // Cập nhật hiển thị tuần
-        function updateWeekDisplay() {
-            const now = new Date();
-            const currentDay = now.getDay(); // 0: Chủ nhật, 1: Thứ 2, ...
-            
-            // Tính ngày thứ 2 của tuần hiện tại (hoặc tuần trước/tuần sau)
-            const monday = new Date(now);
-            const diff = currentDay === 0 ? -6 : 1 - currentDay; // Tính ngày thứ 2
-            monday.setDate(monday.getDate() + diff + (currentWeekOffset * 7));
-            
-            // Cập nhật ngày cho từng ngày trong tuần
-            for (let i = 0; i < days.length; i++) {
-                const dayDate = new Date(monday);
-                dayDate.setDate(monday.getDate() + i);
-                
-                const dateElement = document.getElementById(`${days[i]}Date`);
-                dateElement.textContent = formatDate(dayDate);
-            }
-            
-            // Cập nhật phạm vi tuần
-            const weekStart = new Date(monday);
-            const weekEnd = new Date(monday);
-            weekEnd.setDate(monday.getDate() + 6);
-            
-            const weekRangeElement = document.getElementById('weekRange');
-            weekRangeElement.textContent = `本周: ${formatDateLong(weekStart)} - ${formatDateLong(weekEnd)}`;
-        }
-
-        // Cập nhật hiển thị lịch làm việc
-        function updateScheduleDisplay() {
-            const employee = employees.find(emp => emp.id === selectedEmployeeId);
-            
-            if (employee) {
-                // Cập nhật tiêu đề
-                document.getElementById('selectedEmployeeTitle').textContent = `${employee.name} 的工作时间表`;
-                
-                // Lấy lịch làm việc của nhân viên cho tuần hiện tại
-                const weekKey = getWeekKey();
-                const employeeSchedule = schedules[selectedEmployeeId] ? schedules[selectedEmployeeId][weekKey] : null;
-                
-                // Cập nhật thời gian làm việc, trạng thái và vị trí
-                days.forEach(day => {
-                    // Thời gian làm việc
-                    const startTimeInput = document.querySelector(`.start-time[data-day="${day}"]`);
-                    const endTimeInput = document.querySelector(`.end-time[data-day="${day}"]`);
-                    const statusSelect = document.querySelector(`.status-select[data-day="${day}"]`);
-                    const positionSelect = document.querySelector(`.position-select[data-day="${day}"]`);
-                    
-                    if (employeeSchedule && employeeSchedule[day]) {
-                        const daySchedule = employeeSchedule[day];
-                        
-                        if (daySchedule.start && daySchedule.end) {
-                            startTimeInput.value = daySchedule.start;
-                            endTimeInput.value = daySchedule.end;
-                            statusSelect.value = '';
-                        } else if (daySchedule.status === 'rest') {
-                            startTimeInput.value = '';
-                            endTimeInput.value = '';
-                            statusSelect.value = 'rest';
-                        } else {
-                            startTimeInput.value = '';
-                            endTimeInput.value = '';
-                            statusSelect.value = '';
-                        }
-                        
-                        positionSelect.value = daySchedule.position || '';
-                    } else {
-                        startTimeInput.value = '';
-                        endTimeInput.value = '';
-                        statusSelect.value = '';
-                        positionSelect.value = '';
-                    }
-                });
-                
-                // Tính tổng giờ làm việc
-                calculateTotalHours();
-            } else {
-                // Không có nhân viên nào được chọn
-                document.getElementById('selectedEmployeeTitle').textContent = '员工工作时间表';
-                
-                // Xóa tất cả giá trị
-                days.forEach(day => {
-                    const startTimeInput = document.querySelector(`.start-time[data-day="${day}"]`);
-                    const endTimeInput = document.querySelector(`.end-time[data-day="${day}"]`);
-                    const statusSelect = document.querySelector(`.status-select[data-day="${day}"]`);
-                    const positionSelect = document.querySelector(`.position-select[data-day="${day}"]`);
-                    
-                    startTimeInput.value = '';
-                    endTimeInput.value = '';
-                    statusSelect.value = '';
-                    positionSelect.value = '';
-                });
-                
-                document.getElementById('totalHours').textContent = '0 小时';
-            }
-        }
-
-        // Lưu lịch làm việc
-        function saveSchedule() {
-            if (!selectedEmployeeId) {
-                alert('请先选择员工');
-                return;
-            }
-            
-            const weekKey = getWeekKey();
-            
-            // Khởi tạo nếu chưa có
-            if (!schedules[selectedEmployeeId]) {
-                schedules[selectedEmployeeId] = {};
-            }
-            
-            if (!schedules[selectedEmployeeId][weekKey]) {
-                schedules[selectedEmployeeId][weekKey] = {};
-            }
-            
-            // Lưu thông tin cho từng ngày
-            days.forEach(day => {
-                const startTimeInput = document.querySelector(`.start-time[data-day="${day}"]`);
-                const endTimeInput = document.querySelector(`.end-time[data-day="${day}"]`);
-                const statusSelect = document.querySelector(`.status-select[data-day="${day}"]`);
-                const positionSelect = document.querySelector(`.position-select[data-day="${day}"]`);
-                
-                const daySchedule = {};
-                
-                if (statusSelect.value === 'rest') {
-                    daySchedule.status = 'rest';
-                    daySchedule.start = '';
-                    daySchedule.end = '';
-                } else if (startTimeInput.value && endTimeInput.value) {
-                    daySchedule.start = startTimeInput.value;
-                    daySchedule.end = endTimeInput.value;
-                    daySchedule.status = '';
-                } else {
-                    daySchedule.start = '';
-                    daySchedule.end = '';
-                    daySchedule.status = '';
-                }
-                
-                if (positionSelect.value) {
-                    daySchedule.position = positionSelect.value;
-                }
-                
-                schedules[selectedEmployeeId][weekKey][day] = daySchedule;
-            });
-            
-            // Lưu vào localStorage
-            saveData();
-            
-            alert('工作时间表已保存');
-            
-            // Cập nhật hiển thị tất cả lịch nếu đang hiển thị
-            if (isAllScheduleVisible) {
-                updateAllScheduleDisplay();
-            }
-        }
-
-        // Reset lịch làm việc
-        function resetSchedule() {
-            if (!confirm('确定要重置此员工的工作时间表吗？')) return;
-            
-            if (selectedEmployeeId) {
-                const weekKey = getWeekKey();
-                
-                // Xóa lịch làm việc của nhân viên cho tuần này
-                if (schedules[selectedEmployeeId] && schedules[selectedEmployeeId][weekKey]) {
-                    delete schedules[selectedEmployeeId][weekKey];
-                    
-                    // Nếu không còn lịch nào cho nhân viên này, xóa luôn
-                    if (Object.keys(schedules[selectedEmployeeId]).length === 0) {
-                        delete schedules[selectedEmployeeId];
-                    }
-                    
-                    // Lưu dữ liệu
-                    saveData();
-                }
-                
-                // Cập nhật giao diện
-                updateScheduleDisplay();
-                
-                alert('工作时间表已重置');
-            }
-        }
-
-        // Tính tổng giờ làm việc
-        function calculateTotalHours() {
-            let totalMinutes = 0;
-            
-            days.forEach(day => {
-                const startTimeInput = document.querySelector(`.start-time[data-day="${day}"]`);
-                const endTimeInput = document.querySelector(`.end-time[data-day="${day}"]`);
-                const statusSelect = document.querySelector(`.status-select[data-day="${day}"]`);
-                
-                // Nếu không phải là ngày nghỉ và có thời gian bắt đầu/kết thúc
-                if (statusSelect.value !== 'rest' && startTimeInput.value && endTimeInput.value) {
-                    const startTime = parseTime(startTimeInput.value);
-                    const endTime = parseTime(endTimeInput.value);
-                    
-                    // Tính số phút làm việc
-                    let minutesDiff = (endTime.hours * 60 + endTime.minutes) - (startTime.hours * 60 + startTime.minutes);
-                    
-                    // Nếu thời gian kết thúc nhỏ hơn thời gian bắt đầu (làm qua đêm)
-                    if (minutesDiff < 0) {
-                        minutesDiff += 24 * 60; // Thêm 24 giờ
-                    }
-                    
-                    totalMinutes += minutesDiff;
-                }
-            });
-            
-            // Chuyển đổi thành giờ và phút
-            const hours = Math.floor(totalMinutes / 60);
-            const minutes = totalMinutes % 60;
-            
-            // Hiển thị tổng giờ làm việc
-            const totalHoursElement = document.getElementById('totalHours');
-            if (minutes > 0) {
-                totalHoursElement.textContent = `${hours} 小时 ${minutes} 分钟`;
-            } else {
-                totalHoursElement.textContent = `${hours} 小时`;
-            }
-        }
-
-        // Xem tất cả lịch làm việc
-        function viewAllSchedules() {
-            updateAllScheduleDisplay();
-            document.getElementById('allSchedule').classList.add('show');
-            document.getElementById('toggleAllBtn').textContent = '隐藏所有员工时间表';
-            isAllScheduleVisible = true;
-        }
-
-        // Ẩn tất cả lịch làm việc
-        function hideAllSchedules() {
-            document.getElementById('allSchedule').classList.remove('show');
-            document.getElementById('toggleAllBtn').textContent = '显示所有员工时间表';
-            isAllScheduleVisible = false;
-        }
-
-        // Chuyển đổi hiển thị/ẩn tất cả lịch
-        function toggleAllSchedules() {
-            if (isAllScheduleVisible) {
-                hideAllSchedules();
-            } else {
-                viewAllSchedules();
-            }
-        }
-
-        // Cập nhật hiển thị tất cả lịch
-        function updateAllScheduleDisplay() {
-            const allScheduleContent = document.getElementById('allScheduleContent');
-            const weekKey = getWeekKey();
-            
-            let html = '<table class="schedule-table">';
-            html += '<thead><tr><th>员工姓名</th>';
-            
-            // Tiêu đề các ngày
-            days.forEach((day, index) => {
-                const dateElement = document.getElementById(`${day}Date`);
-                html += `<th>${dayNames[index]}<br>${dateElement.textContent}</th>`;
-            });
-            
-            html += '<th>总计</th></tr></thead><tbody>';
-            
-            // Dữ liệu cho từng nhân viên
-            employees.forEach(employee => {
-                html += `<tr><td>${employee.name}</td>`;
-                
-                let totalMinutes = 0;
-                
-                // Lấy lịch làm việc của nhân viên
-                const employeeSchedule = schedules[employee.id] ? schedules[employee.id][weekKey] : null;
-                
-                // Dữ liệu cho từng ngày
-                days.forEach(day => {
-                    let dayHtml = '';
-                    
-                    if (employeeSchedule && employeeSchedule[day]) {
-                        const daySchedule = employeeSchedule[day];
-                        
-                        if (daySchedule.status === 'rest') {
-                            dayHtml = '<div class="status-rest">休息</div>';
-                        } else if (daySchedule.start && daySchedule.end) {
-                            // Tính giờ làm việc
-                            const startTime = parseTime(daySchedule.start);
-                            const endTime = parseTime(daySchedule.end);
-                            
-                            let minutesDiff = (endTime.hours * 60 + endTime.minutes) - (startTime.hours * 60 + startTime.minutes);
-                            
-                            if (minutesDiff < 0) {
-                                minutesDiff += 24 * 60;
-                            }
-                            
-                            totalMinutes += minutesDiff;
-                            
-                            const hours = Math.floor(minutesDiff / 60);
-                            const minutes = minutesDiff % 60;
-                            
-                            let positionBadge = '';
-                            if (daySchedule.position === 'front') {
-                                positionBadge = '<div class="position-badge position-front">前台</div>';
-                            } else if (daySchedule.position === 'kitchen') {
-                                positionBadge = '<div class="position-badge position-kitchen">厨房</div>';
-                            }
-                            
-                            dayHtml = `${daySchedule.start} - ${daySchedule.end}<br>(${hours}小时${minutes > 0 ? minutes + '分钟' : ''})${positionBadge}`;
-                        } else {
-                            dayHtml = '<div class="status-empty">--</div>';
-                        }
-                    } else {
-                        dayHtml = '<div class="status-empty">--</div>';
-                    }
-                    
-                    html += `<td>${dayHtml}</td>`;
-                });
-                
-                // Tổng giờ làm việc
-                const totalHours = Math.floor(totalMinutes / 60);
-                const remainingMinutes = totalMinutes % 60;
-                
-                let totalText = '';
-                if (totalHours > 0 || remainingMinutes > 0) {
-                    totalText = `${totalHours}小时`;
-                    if (remainingMinutes > 0) {
-                        totalText += `${remainingMinutes}分钟`;
-                    }
-                } else {
-                    totalText = '0小时';
-                }
-                
-                html += `<td><strong>${totalText}</strong></td>`;
-                html += '</tr>';
-            });
-            
-            html += '</tbody></table>';
-            allScheduleContent.innerHTML = html;
-        }
-
-        // In lịch làm việc
-        function printSchedule() {
-            if (!selectedEmployeeId) {
-                alert('请先选择员工');
-                return;
-            }
-            
-            const employee = employees.find(emp => emp.id === selectedEmployeeId);
-            const weekKey = getWeekKey();
-            const employeeSchedule = schedules[selectedEmployeeId] ? schedules[selectedEmployeeId][weekKey] : null;
-            
-            // Tạo nội dung in
-            let printContent = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>${employee.name} 工作时间表</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; padding: 20px; }
-                        h1 { text-align: center; color: #333; }
-                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                        th, td { border: 1px solid #333; padding: 10px; text-align: center; }
-                        th { background-color: #f2f2f2; }
-                        .rest { background-color: #ffeaa7; }
-                        .total { font-weight: bold; font-size: 1.2em; margin-top: 20px; }
-                    </style>
-                </head>
-                <body>
-                    <h1>${employee.name} 工作时间表</h1>
-                    <p style="text-align: center;">${document.getElementById('weekRange').textContent}</p>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>星期</th>
-                                <th>日期</th>
-                                <th>工作时间</th>
-                                <th>状态</th>
-                                <th>工作区域</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            
-            let totalMinutes = 0;
-            
-            // Thêm dữ liệu cho từng ngày
-            days.forEach((day, index) => {
-                const dateElement = document.getElementById(`${day}Date`);
-                let workTime = '--';
-                let status = '--';
-                let position = '--';
-                let rowClass = '';
-                
-                if (employeeSchedule && employeeSchedule[day]) {
-                    const daySchedule = employeeSchedule[day];
-                    
-                    if (daySchedule.status === 'rest') {
-                        workTime = '--';
-                        status = '休息';
-                        rowClass = 'rest';
-                    } else if (daySchedule.start && daySchedule.end) {
-                        workTime = `${daySchedule.start} - ${daySchedule.end}`;
-                        
-                        // Tính giờ làm việc
-                        const startTime = parseTime(daySchedule.start);
-                        const endTime = parseTime(daySchedule.end);
-                        
-                        let minutesDiff = (endTime.hours * 60 + endTime.minutes) - (startTime.hours * 60 + startTime.minutes);
-                        
-                        if (minutesDiff < 0) {
-                            minutesDiff += 24 * 60;
-                        }
-                        
-                        totalMinutes += minutesDiff;
-                        
-                        const hours = Math.floor(minutesDiff / 60);
-                        const minutes = minutesDiff % 60;
-                        
-                        status = `${hours}小时${minutes > 0 ? minutes + '分钟' : ''}`;
-                    }
-                    
-                    if (daySchedule.position === 'front') {
-                        position = '前台/服务区 (Horu)';
-                    } else if (daySchedule.position === 'kitchen') {
-                        position = '厨房区 (Kitchen)';
-                    }
-                }
-                
-                printContent += `
-                    <tr${rowClass ? ` class="${rowClass}"` : ''}>
-                        <td>${dayNames[index]}</td>
-                        <td>${dateElement.textContent}</td>
-                        <td>${workTime}</td>
-                        <td>${status}</td>
-                        <td>${position}</td>
-                    </tr>
-                `;
-            });
-            
-            // Tổng giờ làm việc
-            const totalHours = Math.floor(totalMinutes / 60);
-            const remainingMinutes = totalMinutes % 60;
-            
-            let totalText = '';
-            if (totalHours > 0 || remainingMinutes > 0) {
-                totalText = `${totalHours}小时`;
-                if (remainingMinutes > 0) {
-                    totalText += `${remainingMinutes}分钟`;
-                }
-            } else {
-                totalText = '0小时';
-            }
-            
-            printContent += `
-                        </tbody>
-                    </table>
-                    <div class="total">本周总计工作时间: ${totalText}</div>
-                    <p style="text-align: center; margin-top: 30px;">生成时间: ${new Date().toLocaleString('zh-CN')}</p>
-                </body>
-                </html>
-            `;
-            
-            // Mở cửa sổ in
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(printContent);
-            printWindow.document.close();
-            printWindow.print();
-        }
-
-        // Hàm tiện ích: Lấy key cho tuần hiện tại
-        function getWeekKey() {
+        // 周管理
+        function getCurrentWeekDates() {
             const now = new Date();
             const currentDay = now.getDay();
             const monday = new Date(now);
             const diff = currentDay === 0 ? -6 : 1 - currentDay;
             monday.setDate(monday.getDate() + diff + (currentWeekOffset * 7));
             
+            const dates = [];
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(monday);
+                date.setDate(monday.getDate() + i);
+                dates.push(date);
+            }
+            return dates;
+        }
+
+        function getWeekKey() {
+            const monday = getCurrentWeekDates()[0];
             return `${monday.getFullYear()}-${monday.getMonth()+1}-${monday.getDate()}`;
         }
 
-        // Hàm tiện ích: Định dạng ngày (MM/DD)
+        function initWeekDisplay() {
+            const dates = getCurrentWeekDates();
+            const start = formatDate(dates[0]);
+            const end = formatDate(dates[6]);
+            document.getElementById('weekDisplay').textContent = `${start} - ${end}`;
+            document.getElementById('scheduleWeek').textContent = `${start} - ${end}`;
+        }
+
         function formatDate(date) {
             return `${date.getMonth()+1}/${date.getDate()}`;
         }
 
-        // Hàm tiện ích: Định dạng ngày dài (YYYY年MM月DD日)
-        function formatDateLong(date) {
-            return `${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日`;
+        // 员工管理
+        function renderEmployeeList() {
+            const container = document.getElementById('employeeList');
+            container.innerHTML = '';
+            
+            employees.forEach(employee => {
+                const tag = document.createElement('div');
+                tag.className = 'employee-tag';
+                tag.style.background = employee.color;
+                tag.innerHTML = `
+                    ${employee.name}
+                    <button class="remove" onclick="deleteEmployee(${employee.id})">×</button>
+                `;
+                container.appendChild(tag);
+            });
         }
 
-        // Hàm tiện ích: Phân tích thời gian từ chuỗi HH:MM
-        function parseTime(timeStr) {
-            const parts = timeStr.split(':');
-            return {
-                hours: parseInt(parts[0]),
-                minutes: parseInt(parts[1])
+        function renderEmployeeSelect() {
+            const select = document.getElementById('employeeSelect');
+            const currentValue = select.value;
+            
+            select.innerHTML = '<option value="">选择员工</option>';
+            employees.forEach(employee => {
+                const option = document.createElement('option');
+                option.value = employee.id;
+                option.textContent = employee.name;
+                if (employee.id.toString() === currentValue) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        }
+
+        function addEmployee() {
+            const input = document.getElementById('newEmployeeName');
+            const name = input.value.trim();
+            
+            if (!name) {
+                alert('请输入员工姓名');
+                return;
+            }
+            
+            if (employees.some(e => e.name === name)) {
+                alert('员工已存在');
+                return;
+            }
+            
+            const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe'];
+            const newId = employees.length ? Math.max(...employees.map(e => e.id)) + 1 : 1;
+            const newEmployee = {
+                id: newId,
+                name: name,
+                color: colors[newId % colors.length]
             };
+            
+            employees.push(newEmployee);
+            saveData();
+            renderEmployeeList();
+            renderEmployeeSelect();
+            input.value = '';
+            
+            // 自动选择新员工
+            document.getElementById('employeeSelect').value = newId;
+            selectedEmployeeId = newId;
+            updateCurrentEmployee();
+        }
+
+        function deleteEmployee(id) {
+            if (!confirm('确定删除此员工吗？')) return;
+            
+            employees = employees.filter(e => e.id !== id);
+            if (schedules[id]) delete schedules[id];
+            
+            if (selectedEmployeeId === id) {
+                selectedEmployeeId = null;
+                document.getElementById('employeeSelect').value = '';
+                updateCurrentEmployee();
+            }
+            
+            saveData();
+            renderEmployeeList();
+            renderEmployeeSelect();
+        }
+
+        // 时间表渲染
+        function renderScheduleGrid() {
+            const grid = document.getElementById('scheduleGrid');
+            const dates = getCurrentWeekDates();
+            const weekKey = getWeekKey();
+            
+            grid.innerHTML = '';
+            
+            dates.forEach((date, index) => {
+                const day = days[index];
+                const daySchedule = selectedEmployeeId && schedules[selectedEmployeeId] && schedules[selectedEmployeeId][weekKey] ? 
+                    schedules[selectedEmployeeId][weekKey][day] || {} : {};
+                
+                const card = document.createElement('div');
+                card.className = 'day-card';
+                if (daySchedule.status === 'rest') card.classList.add('active');
+                
+                card.innerHTML = `
+                    <div class="day-header">
+                        <div class="day-name">${dayNames[index]}</div>
+                        <div class="day-date">${formatDate(date)}</div>
+                    </div>
+                    
+                    <div class="time-input-group">
+                        <div class="time-input-row">
+                            <label>开始</label>
+                            <input type="time" class="time-input start-time" value="${daySchedule.start || ''}" 
+                                   onchange="updateTime('${day}', 'start', this.value)">
+                            <span class="divider">-</span>
+                            <label>结束</label>
+                            <input type="time" class="time-input end-time" value="${daySchedule.end || ''}" 
+                                   onchange="updateTime('${day}', 'end', this.value)">
+                        </div>
+                    </div>
+                    
+                    <select class="status-select ${daySchedule.status === 'rest' ? 'rest' : ''}" 
+                            onchange="updateStatus('${day}', this.value)">
+                        <option value="">正常上班</option>
+                        <option value="rest" ${daySchedule.status === 'rest' ? 'selected' : ''}>休息</option>
+                    </select>
+                    
+                    <select class="position-select ${daySchedule.position || ''}" 
+                            onchange="updatePosition('${day}', this.value)">
+                        <option value="">选择区域</option>
+                        <option value="front" ${daySchedule.position === 'front' ? 'selected' : ''}>前台/服务区</option>
+                        <option value="kitchen" ${daySchedule.position === 'kitchen' ? 'selected' : ''}>厨房区</option>
+                    </select>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function updateCurrentEmployee() {
+            const employee = employees.find(e => e.id === selectedEmployeeId);
+            document.getElementById('currentEmployee').textContent = employee ? employee.name : '选择员工';
+            document.getElementById('currentEmployee').style.color = employee ? employee.color : '';
+            renderScheduleGrid();
+        }
+
+        // 时间操作
+        function updateTime(day, type, value) {
+            if (!selectedEmployeeId) return;
+            
+            const weekKey = getWeekKey();
+            if (!schedules[selectedEmployeeId]) schedules[selectedEmployeeId] = {};
+            if (!schedules[selectedEmployeeId][weekKey]) schedules[selectedEmployeeId][weekKey] = {};
+            if (!schedules[selectedEmployeeId][weekKey][day]) schedules[selectedEmployeeId][weekKey][day] = {};
+            
+            schedules[selectedEmployeeId][weekKey][day][type] = value;
+            
+            // 如果设置了时间，清除休息状态
+            if (value && schedules[selectedEmployeeId][weekKey][day].status === 'rest') {
+                schedules[selectedEmployeeId][weekKey][day].status = '';
+                renderScheduleGrid();
+            }
+            
+            calculateTotalHours();
+            document.getElementById('saveBtn').classList.add('pulse');
+            setTimeout(() => document.getElementById('saveBtn').classList.remove('pulse'), 300);
+        }
+
+        function updateStatus(day, status) {
+            if (!selectedEmployeeId) return;
+            
+            const weekKey = getWeekKey();
+            if (!schedules[selectedEmployeeId]) schedules[selectedEmployeeId] = {};
+            if (!schedules[selectedEmployeeId][weekKey]) schedules[selectedEmployeeId][weekKey] = {};
+            if (!schedules[selectedEmployeeId][weekKey][day]) schedules[selectedEmployeeId][weekKey][day] = {};
+            
+            schedules[selectedEmployeeId][weekKey][day].status = status;
+            
+            // 如果选择休息，清除时间
+            if (status === 'rest') {
+                schedules[selectedEmployeeId][weekKey][day].start = '';
+                schedules[selectedEmployeeId][weekKey][day].end = '';
+            }
+            
+            renderScheduleGrid();
+            calculateTotalHours();
+            document.getElementById('saveBtn').classList.add('pulse');
+        }
+
+        function updatePosition(day, position) {
+            if (!selectedEmployeeId) return;
+            
+            const weekKey = getWeekKey();
+            if (!schedules[selectedEmployeeId]) schedules[selectedEmployeeId] = {};
+            if (!schedules[selectedEmployeeId][weekKey]) schedules[selectedEmployeeId][weekKey] = {};
+            if (!schedules[selectedEmployeeId][weekKey][day]) schedules[selectedEmployeeId][weekKey][day] = {};
+            
+            schedules[selectedEmployeeId][weekKey][day].position = position;
+            document.getElementById('saveBtn').classList.add('pulse');
+        }
+
+        function saveSchedule() {
+            if (!selectedEmployeeId) {
+                alert('请先选择员工');
+                return;
+            }
+            
+            saveData();
+            document.getElementById('saveBtn').textContent = '✓ 已保存';
+            document.getElementById('saveBtn').style.background = '#27ae60';
+            
+            setTimeout(() => {
+                document.getElementById('saveBtn').textContent = '💾 保存';
+                document.getElementById('saveBtn').style.background = '';
+            }, 2000);
+        }
+
+        function calculateTotalHours() {
+            if (!selectedEmployeeId) {
+                document.getElementById('totalHours').innerHTML = '0<span>小时</span>';
+                return;
+            }
+            
+            const weekKey = getWeekKey();
+            const weekSchedule = schedules[selectedEmployeeId] && schedules[selectedEmployeeId][weekKey] ? 
+                schedules[selectedEmployeeId][weekKey] : {};
+            
+            let totalMinutes = 0;
+            
+            Object.values(weekSchedule).forEach(day => {
+                if (day.start && day.end && day.status !== 'rest') {
+                    const start = parseTime(day.start);
+                    const end = parseTime(day.end);
+                    
+                    let diff = (end.h * 60 + end.m) - (start.h * 60 + start.m);
+                    if (diff < 0) diff += 24 * 60;
+                    
+                    totalMinutes += diff;
+                }
+            });
+            
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            
+            document.getElementById('totalHours').innerHTML = minutes > 0 ? 
+                `${hours}<span>小时</span> ${minutes}<span>分钟</span>` : 
+                `${hours}<span>小时</span>`;
+        }
+
+        function parseTime(timeStr) {
+            const [h, m] = timeStr.split(':').map(Number);
+            return { h, m };
+        }
+
+        // 快速设置
+        function quickSetSchedule() {
+            if (!selectedEmployeeId) {
+                alert('请先选择员工');
+                return;
+            }
+            
+            const template = prompt('输入快速设置模板 (如: 18:00-24:00)：');
+            if (!template) return;
+            
+            const [start, end] = template.split('-');
+            if (!start || !end) {
+                alert('格式错误，请使用 "开始时间-结束时间" 格式');
+                return;
+            }
+            
+            const weekKey = getWeekKey();
+            if (!schedules[selectedEmployeeId]) schedules[selectedEmployeeId] = {};
+            if (!schedules[selectedEmployeeId][weekKey]) schedules[selectedEmployeeId][weekKey] = {};
+            
+            days.forEach(day => {
+                schedules[selectedEmployeeId][weekKey][day] = {
+                    start: start.trim(),
+                    end: end.trim(),
+                    status: '',
+                    position: ''
+                };
+            });
+            
+            renderScheduleGrid();
+            calculateTotalHours();
+        }
+
+        function copyLastWeek() {
+            if (!selectedEmployeeId) {
+                alert('请先选择员工');
+                return;
+            }
+            
+            const lastWeekKey = getLastWeekKey();
+            if (!schedules[selectedEmployeeId] || !schedules[selectedEmployeeId][lastWeekKey]) {
+                alert('上周无数据可复制');
+                return;
+            }
+            
+            const weekKey = getWeekKey();
+            if (!schedules[selectedEmployeeId]) schedules[selectedEmployeeId] = {};
+            schedules[selectedEmployeeId][weekKey] = JSON.parse(JSON.stringify(schedules[selectedEmployeeId][lastWeekKey]));
+            
+            renderScheduleGrid();
+            calculateTotalHours();
+        }
+
+        function getLastWeekKey() {
+            currentWeekOffset--;
+            const key = getWeekKey();
+            currentWeekOffset++;
+            return key;
+        }
+
+        // 全视图
+        function viewAllSchedules() {
+            const container = document.getElementById('allScheduleView');
+            const grid = document.getElementById('allScheduleGrid');
+            const weekKey = getWeekKey();
+            
+            grid.innerHTML = '';
+            
+            employees.forEach(employee => {
+                const card = document.createElement('div');
+                card.className = 'employee-schedule-card';
+                
+                const employeeSchedule = schedules[employee.id] && schedules[employee.id][weekKey] ? 
+                    schedules[employee.id][weekKey] : {};
+                
+                let scheduleHTML = '';
+                let totalMinutes = 0;
+                
+                days.forEach((day, index) => {
+                    const daySchedule = employeeSchedule[day] || {};
+                    let dayHTML = '';
+                    
+                    if (daySchedule.status === 'rest') {
+                        dayHTML = '<div style="color:#f39c12;">休息</div>';
+                    } else if (daySchedule.start && daySchedule.end) {
+                        const start = parseTime(daySchedule.start);
+                        const end = parseTime(daySchedule.end);
+                        
+                        let diff = (end.h * 60 + end.m) - (start.h * 60 + start.m);
+                        if (diff < 0) diff += 24 * 60;
+                        totalMinutes += diff;
+                        
+                        const hours = Math.floor(diff / 60);
+                        const minutes = diff % 60;
+                        
+                        dayHTML = `${daySchedule.start}-${daySchedule.end}<br><small>${hours}h${minutes > 0 ? minutes + 'm' : ''}</small>`;
+                    } else {
+                        dayHTML = '<div style="color:#95a5a6;">--</div>';
+                    }
+                    
+                    scheduleHTML += `
+                        <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee;">
+                            <span>${dayNames[index]}</span>
+                            <span>${dayHTML}</span>
+                        </div>
+                    `;
+                });
+                
+                const totalHours = Math.floor(totalMinutes / 60);
+                const totalMinutesRemain = totalMinutes % 60;
+                
+                card.innerHTML = `
+                    <div class="card-header">
+                        <h3 style="color:${employee.color}">${employee.name}</h3>
+                        <div style="font-weight: bold; color: #2c3e50;">
+                            ${totalHours}h${totalMinutesRemain > 0 ? totalMinutesRemain + 'm' : ''}
+                        </div>
+                    </div>
+                    ${scheduleHTML}
+                `;
+                
+                grid.appendChild(card);
+            });
+            
+            container.classList.add('active');
+        }
+
+        function closeAllView() {
+            document.getElementById('allScheduleView').classList.remove('active');
+        }
+
+        // 打印功能
+        function printSchedule() {
+            if (!selectedEmployeeId) {
+                alert('请先选择员工');
+                return;
+            }
+            
+            window.print();
+        }
+
+        // 事件监听
+        function setupEventListeners() {
+            // 员工选择
+            document.getElementById('employeeSelect').addEventListener('change', function(e) {
+                selectedEmployeeId = e.target.value ? parseInt(e.target.value) : null;
+                updateCurrentEmployee();
+                calculateTotalHours();
+            });
+            
+            // 添加员工
+            document.getElementById('addEmployeeBtn').addEventListener('click', addEmployee);
+            document.getElementById('newEmployeeName').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') addEmployee();
+            });
+            
+            // 周导航
+            document.getElementById('prevWeek').addEventListener('click', function() {
+                currentWeekOffset--;
+                initWeekDisplay();
+                renderScheduleGrid();
+                calculateTotalHours();
+            });
+            
+            document.getElementById('nextWeek').addEventListener('click', function() {
+                currentWeekOffset++;
+                initWeekDisplay();
+                renderScheduleGrid();
+                calculateTotalHours();
+            });
+            
+            // 按钮事件
+            document.getElementById('saveBtn').addEventListener('click', saveSchedule);
+            document.getElementById('resetBtn').addEventListener('click', function() {
+                if (confirm('确定重置本周时间表？')) {
+                    if (selectedEmployeeId) {
+                        const weekKey = getWeekKey();
+                        if (schedules[selectedEmployeeId]) {
+                            delete schedules[selectedEmployeeId][weekKey];
+                        }
+                        renderScheduleGrid();
+                        calculateTotalHours();
+                        saveData();
+                    }
+                }
+            });
+            
+            document.getElementById('viewAllBtn').addEventListener('click', viewAllSchedules);
+            document.getElementById('closeAllViewBtn').addEventListener('click', closeAllView);
+            document.getElementById('printBtn').addEventListener('click', printSchedule);
+            document.getElementById('quickSetBtn').addEventListener('click', quickSetSchedule);
+            document.getElementById('copyLastWeekBtn').addEventListener('click', copyLastWeek);
+            document.getElementById('saveAllBtn').addEventListener('click', saveSchedule);
         }
     </script>
 </body>
