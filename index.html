@@ -1109,24 +1109,19 @@
                     </label>
                     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px;">
                         <label style="display: flex; align-items: center; gap: 8px; padding: 10px; background: var(--light); border-radius: 10px;">
-                            <input type="checkbox" class="day-checkbox" value="mon" checked>
-                            <span>周一</span>
+                            <input type="checkbox" class="day-checkbox" value="mon" checked> 周一
                         </label>
                         <label style="display: flex; align-items: center; gap: 8px; padding: 10px; background: var(--light); border-radius: 10px;">
-                            <input type="checkbox" class="day-checkbox" value="tue" checked>
-                            <span>周二</span>
+                            <input type="checkbox" class="day-checkbox" value="tue" checked> 周二
                         </label>
                         <label style="display: flex; align-items: center; gap: 8px; padding: 10px; background: var(--light); border-radius: 10px;">
-                            <input type="checkbox" class="day-checkbox" value="wed" checked>
-                            <span>周三</span>
+                            <input type="checkbox" class="day-checkbox" value="wed" checked> 周三
                         </label>
                         <label style="display: flex; align-items: center; gap: 8px; padding: 10px; background: var(--light); border-radius: 10px;">
-                            <input type="checkbox" class="day-checkbox" value="thu" checked>
-                            <span>周四</span>
+                            <input type="checkbox" class="day-checkbox" value="thu" checked> 周四
                         </label>
                         <label style="display: flex; align-items: center; gap: 8px; padding: 10px; background: var(--light); border-radius: 10px;">
-                            <input type="checkbox" class="day-checkbox" value="fri" checked>
-                            <span>周五</span>
+                            <input type="checkbox" class="day-checkbox" value="fri" checked> 周五
                         </label>
                         <label style="display: flex; align-items: center; gap: 8px; padding: 10px; background: var(--light); border-radius: 10px;">
                             <input type="checkbox" class="day-checkbox" value="sat">
@@ -1197,6 +1192,8 @@
             const url = `${API_URL}?method=${method}&_=${Date.now()}`;
             const fullUrl = proxyUrl + encodeURIComponent(url);
             
+            console.log(`📡 API Call: ${method}`, data || 'No data');
+            
             try {
                 const options = {
                     method: data ? 'POST' : 'GET',
@@ -1217,10 +1214,11 @@
                 }
                 
                 const result = await response.json();
+                console.log(`✅ API Response (${method}):`, result);
                 return result;
                 
             } catch (error) {
-                console.error('❌ API Error:', error);
+                console.error(`❌ API Error (${method}):`, error);
                 showToast(`网络错误: ${error.message}`, 'error');
                 throw error;
             }
@@ -1255,13 +1253,8 @@
             try {
                 const result = await callAPI('getEmployees');
                 if (result.success) {
-                    employees = result.data;
-                    
-                    // 修复: 确保员工名称正确显示
-                    employees = employees.map(emp => ({
-                        ...emp,
-                        name: emp.name || `员工${emp.id}`
-                    }));
+                    employees = result.data || [];
+                    console.log('👥 Loaded employees:', employees);
                     
                     if (employees.length > 0 && !selectedEmployeeId) {
                         selectedEmployeeId = employees[0].id;
@@ -1271,7 +1264,7 @@
                     renderEmployeeList();
                 }
             } catch (error) {
-                console.error('加载员工失败:', error);
+                console.error('Failed to load employees:', error);
             }
         }
 
@@ -1280,13 +1273,14 @@
                 const weekKey = getWeekKey();
                 const result = await callAPI('getSchedules', { weekKey });
                 if (result.success) {
-                    schedules = result.data;
+                    schedules = result.data || {};
+                    console.log('📅 Loaded schedules:', schedules);
                     updateEmployeeHours();
                     renderSchedule();
                     calculateTotalHours();
                 }
             } catch (error) {
-                console.error('加载排班失败:', error);
+                console.error('Failed to load schedules:', error);
             }
         }
 
@@ -1604,33 +1598,13 @@
                     createdAt: new Date().toISOString()
                 });
                 
-                if (result.success && result.data && result.data.id) {
-                    // 修复: 使用API返回的员工ID和名称
-                    const newEmployee = {
-                        id: result.data.id,
-                        name: name, // 确保使用用户输入的姓名
-                        color: color
-                    };
-                    
-                    // 添加到本地数组
-                    employees.push(newEmployee);
+                if (result.success) {
+                    // 重新加载员工列表
+                    await loadEmployees();
                     
                     // 清空输入框
                     nameInput.value = '';
                     colorInput.value = '#5e72e4';
-                    
-                    // 如果这是第一个员工，自动选择
-                    if (employees.length === 1) {
-                        selectedEmployeeId = newEmployee.id;
-                    }
-                    
-                    // 更新界面
-                    renderEmployeeCards();
-                    renderEmployeeList();
-                    
-                    if (selectedEmployeeId === newEmployee.id) {
-                        renderSchedule();
-                    }
                     
                     showToast(`员工 "${name}" 已添加`, 'success');
                 }
@@ -1647,21 +1621,33 @@
         }
 
         async function deleteEmployee() {
-            if (!employeeToDelete) return;
+            if (!employeeToDelete) {
+                console.error('No employee to delete');
+                return;
+            }
+            
+            console.log('🗑️ Deleting employee:', employeeToDelete);
             
             try {
-                const result = await callAPI('deleteEmployee', { employeeId: employeeToDelete });
+                const result = await callAPI('deleteEmployee', { 
+                    employeeId: employeeToDelete 
+                });
+                
+                console.log('Delete API result:', result);
                 
                 if (result.success) {
-                    // 修复: 正确移除本地数据
-                    employees = employees.filter(e => e.id !== employeeToDelete);
+                    // 从本地数据中移除员工
+                    const employeeIndex = employees.findIndex(e => e.id === employeeToDelete);
+                    if (employeeIndex > -1) {
+                        employees.splice(employeeIndex, 1);
+                    }
                     
                     // 移除排班数据
                     delete schedules[employeeToDelete];
                     
                     // 如果删除的是当前选中的员工，选择另一个
                     if (selectedEmployeeId === employeeToDelete) {
-                        selectedEmployeeId = employees.length > 0 ? employees[0].id : null;
+                        selectedEmployeeId = employees.length > 0 ? employees[0]?.id : null;
                     }
                     
                     // 更新界面
@@ -1674,8 +1660,11 @@
                     // 关闭确认对话框
                     document.getElementById('confirmDialog').classList.remove('active');
                     employeeToDelete = null;
+                } else {
+                    throw new Error(result.message || '删除失败');
                 }
             } catch (error) {
+                console.error('删除失败:', error);
                 showToast(`删除失败: ${error.message}`, 'error');
                 document.getElementById('confirmDialog').classList.remove('active');
                 employeeToDelete = null;
@@ -1700,17 +1689,19 @@
                     id: employeeId,
                     name: employee.name,
                     color: employee.color
+                }).then(() => {
+                    // 更新界面
+                    renderEmployeeCards();
+                    renderEmployeeList();
+                    
+                    if (selectedEmployeeId === employeeId) {
+                        updateScheduleTitle();
+                    }
+                    
+                    showToast('员工信息已更新', 'success');
+                }).catch(error => {
+                    showToast(`更新失败: ${error.message}`, 'error');
                 });
-                
-                // 更新界面
-                renderEmployeeCards();
-                renderEmployeeList();
-                
-                if (selectedEmployeeId === employeeId) {
-                    updateScheduleTitle();
-                }
-                
-                showToast('员工信息已更新', 'success');
             }
         }
 
